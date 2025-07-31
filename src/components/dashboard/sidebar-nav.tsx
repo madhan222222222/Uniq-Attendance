@@ -48,13 +48,14 @@ export function SidebarNav({ role }: SidebarNavProps) {
       {navItems.map((item) => (
         <SidebarMenuItem key={item.href}>
           <SidebarMenuButton
-            as={Link}
-            href={item.href}
+            asChild
             isActive={pathname === item.href.split('?')[0]}
             tooltip={{ children: item.label }}
           >
-            <item.icon />
-            <span>{item.label}</span>
+            <Link href={item.href}>
+              <item.icon />
+              <span>{item.label}</span>
+            </Link>
           </SidebarMenuButton>
         </SidebarMenuItem>
       ))}
