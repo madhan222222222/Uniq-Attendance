@@ -1,5 +1,7 @@
 import { LoginForm } from "@/components/auth/login-form";
+import { Button } from "@/components/ui/button";
 import { GraduationCap } from "lucide-react";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -15,6 +17,14 @@ export default function Home() {
       </div>
       <div className="w-full max-w-sm pt-8">
         <LoginForm />
+         <div className="mt-4 text-center text-sm">
+            Want to create an account?{' '}
+            <Button variant="link" asChild className="p-0 h-auto">
+                <Link href="/dashboard/register?role=admin">
+                    Register as Admin
+                </Link>
+            </Button>
+        </div>
       </div>
     </main>
   );
