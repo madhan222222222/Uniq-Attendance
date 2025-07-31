@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { format } from "date-fns"
-import { Calendar as CalendarIcon } from "lucide-react"
+import { Calendar as CalendarIcon, Loader2 } from "lucide-react"
 import { DateRange } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
@@ -18,19 +18,43 @@ import { locations } from "@/lib/data"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-
-const mockReportData = [
-  { student: 'Aarav Kumar', batch: 'Morning Physics', date: '2024-07-28', status: 'Present', topic: 'Kinematics' },
-  { student: 'Priya Singh', batch: 'Morning Physics', date: '2024-07-28', status: 'Absent', topic: 'Kinematics' },
-  { student: 'Diya Sharma', batch: 'Evening Maths', date: '2024-07-27', status: 'Present', topic: 'Calculus' },
-  { student: 'Rohan Patel', batch: 'Weekend Chemistry', date: '2024-07-26', status: 'Present', topic: 'Organic Chemistry' },
-]
+import { getReportData, type ReportData } from "@/app/actions/attendance"
+import { useToast } from "@/hooks/use-toast"
 
 export default function ReportingPage() {
   const [date, setDate] = React.useState<DateRange | undefined>({
     from: new Date(2024, 6, 20),
     to: new Date(),
-  })
+  });
+  const [location, setLocation] = React.useState<string | undefined>();
+  const [reportData, setReportData] = React.useState<ReportData[]>([]);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const { toast } = useToast();
+
+  const handleApplyFilters = async () => {
+    setIsLoading(true);
+    setReportData([]);
+    const result = await getReportData({
+      location,
+      from: date?.from,
+      to: date?.to
+    });
+    if (result.success) {
+      setReportData(result.data);
+    } else {
+      toast({
+        variant: "destructive",
+        title: "Error fetching report",
+        description: result.error,
+      })
+    }
+    setIsLoading(false);
+  }
+
+  React.useEffect(() => {
+    handleApplyFilters();
+     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="flex flex-col gap-6">
@@ -39,12 +63,13 @@ export default function ReportingPage() {
           <CardTitle className="font-headline">Attendance Reporting</CardTitle>
           <CardDescription>Filter and view attendance records.</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-wrap gap-4">
-          <Select>
+        <CardContent className="flex flex-wrap items-center gap-4">
+          <Select onValueChange={setLocation} value={location}>
             <SelectTrigger className="w-full md:w-[180px]">
               <SelectValue placeholder="Select Location" />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="all">All Locations</SelectItem>
               {locations.map(loc => <SelectItem key={loc} value={loc.toLowerCase()}>{loc}</SelectItem>)}
             </SelectContent>
           </Select>
@@ -86,7 +111,10 @@ export default function ReportingPage() {
               </PopoverContent>
             </Popover>
           </div>
-          <Button>Apply Filters</Button>
+          <Button onClick={handleApplyFilters} disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Apply Filters
+            </Button>
         </CardContent>
       </Card>
       
@@ -106,7 +134,21 @@ export default function ReportingPage() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {mockReportData.map((row, index) => (
+                    {isLoading && (
+                        <TableRow>
+                            <TableCell colSpan={5} className="text-center">
+                                <Loader2 className="mx-auto h-8 w-8 animate-spin text-primary" />
+                            </TableCell>
+                        </TableRow>
+                    )}
+                    {!isLoading && reportData.length === 0 && (
+                         <TableRow>
+                            <TableCell colSpan={5} className="text-center text-muted-foreground">
+                                No data available for the selected filters.
+                            </TableCell>
+                        </TableRow>
+                    )}
+                    {!isLoading && reportData.map((row, index) => (
                         <TableRow key={index}>
                             <TableCell className="font-medium">{row.student}</TableCell>
                             <TableCell>{row.batch}</TableCell>

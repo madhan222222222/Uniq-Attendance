@@ -31,6 +31,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { students, batches, Batch, Student } from "@/lib/data";
 import { AiReasonDialog } from "./ai-reason-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { submitAttendance } from "@/app/actions/attendance";
+import { Loader2 } from "lucide-react";
 
 type AttendanceStatus = "present" | "absent" | "unset";
 type AttendanceRecord = Record<string, AttendanceStatus>;
@@ -40,6 +42,8 @@ export function AttendanceTracker() {
   const [batchStudents, setBatchStudents] = useState<Student[]>([]);
   const [attendance, setAttendance] = useState<AttendanceRecord>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [todayTopic, setTodayTopic] = useState("");
+  const [upcomingTopic, setUpcomingTopic] = useState("");
   const { toast } = useToast();
 
   const handleBatchChange = (batchId: string) => {
@@ -51,7 +55,7 @@ export function AttendanceTracker() {
       );
       setBatchStudents(studentsInBatch);
       const initialAttendance = studentsInBatch.reduce((acc, student) => {
-        acc[student.id] = "unset";
+        acc[student.id] = "present"; // Default to present
         return acc;
       }, {} as AttendanceRecord);
       setAttendance(initialAttendance);
@@ -62,19 +66,45 @@ export function AttendanceTracker() {
     setAttendance((prev) => ({ ...prev, [studentId]: status }));
   };
   
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    if (!selectedBatchId) return;
     setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-        setIsSubmitting(false);
+    
+    const payload = {
+        batchId: selectedBatchId,
+        date: new Date().toISOString(),
+        todayTopic,
+        upcomingTopic,
+        attendance,
+    };
+
+    const result = await submitAttendance(payload);
+
+    setIsSubmitting(false);
+
+    if (result.success) {
         toast({
             title: "Attendance Submitted",
             description: "The attendance record has been saved successfully.",
         });
-    }, 1500);
+        // Reset form
+        setSelectedBatchId(null);
+        setBatchStudents([]);
+        setAttendance({});
+        setTodayTopic("");
+        setUpcomingTopic("");
+
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Submission Failed",
+            description: result.message,
+        })
+    }
   }
 
   const selectedBatch = batches.find((b) => b.id === selectedBatchId);
+  const isSubmitDisabled = isSubmitting || Object.values(attendance).some(s => s === 'unset');
 
   return (
     <div className="space-y-6">
@@ -86,7 +116,7 @@ export function AttendanceTracker() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Select onValueChange={handleBatchChange}>
+          <Select onValueChange={handleBatchChange} value={selectedBatchId || ""}>
             <SelectTrigger className="w-full md:w-[300px]">
               <SelectValue placeholder="Select a Batch" />
             </SelectTrigger>
@@ -113,11 +143,11 @@ export function AttendanceTracker() {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="today-topic">Today's Topic</Label>
-                <Input id="today-topic" placeholder="e.g., Introduction to React Hooks" />
+                <Input id="today-topic" placeholder="e.g., Introduction to React Hooks" value={todayTopic} onChange={e => setTodayTopic(e.target.value)} />
               </div>
               <div>
                 <Label htmlFor="upcoming-topic">Upcoming Topic</Label>
-                <Textarea id="upcoming-topic" placeholder="e.g., State management with Context API" />
+                <Textarea id="upcoming-topic" placeholder="e.g., State management with Context API" value={upcomingTopic} onChange={e => setUpcomingTopic(e.target.value)} />
               </div>
             </div>
             <Table className="mt-6">
@@ -162,7 +192,8 @@ export function AttendanceTracker() {
               </TableBody>
             </Table>
             <div className="flex justify-end mt-6">
-                <Button onClick={handleSubmit} disabled={isSubmitting}>
+                <Button onClick={handleSubmit} disabled={isSubmitDisabled}>
+                    {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     {isSubmitting ? 'Submitting...' : 'Submit Attendance'}
                 </Button>
             </div>
