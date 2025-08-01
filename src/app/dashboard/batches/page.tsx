@@ -47,16 +47,6 @@ export default function BatchesPage() {
           <CardTitle className="font-headline">Batches</CardTitle>
           <CardDescription>Manage course batches and student assignments.</CardDescription>
         </div>
-        <AddBatchDialog
-          onBatchAdded={handleBatchAdded}
-          open={isDialogOpen}
-          onOpenChange={setIsDialogOpen}
-        >
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Batch
-          </Button>
-        </AddBatchDialog>
       </CardHeader>
       <CardContent>
         {isLoading ? (

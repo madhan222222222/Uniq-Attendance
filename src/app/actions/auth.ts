@@ -2,8 +2,8 @@
 "use server";
 
 import { auth, db } from "@/lib/firebase";
-import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, updatePassword } from "firebase/auth";
-import { doc, setDoc, getDoc, collection, addDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 export async function loginUser(payload: any) {
     console.log("Login attempt:", payload);
@@ -33,7 +33,7 @@ export async function loginUser(payload: any) {
 
 export async function registerUser(payload: any) {
     console.log("New user registered:", payload);
-    const { name, email, password, role, location } from payload;
+    const { name, email, password, role, location } = payload;
 
     try {
         // Create user in Firebase Auth
@@ -71,73 +71,4 @@ export async function registerUser(payload: any) {
         }
         return { success: false, message: error.message || "An unknown error occurred during registration." };
     }
-}
-
-export async function addStaff(payload: any) {
-    const { name, email, phone, location } = payload;
-    // For staff, we can create a temporary random password
-    const password = Math.random().toString(36).slice(-8);
-
-    try {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const user = userCredential.user;
-        
-        await setDoc(doc(db, "users", user.uid), {
-            uid: user.uid, name, email, role: 'staff', location,
-        });
-
-        await setDoc(doc(db, "staff", user.uid), {
-            id: user.uid, name, email, phone, location, role: 'staff',
-        });
-
-        // This is not secure and is a temporary solution. 
-        // In a real app, you would send a password reset or verification email.
-        await sendPasswordResetEmail(auth, email);
-
-        return { success: true, message: `Staff member ${name} added. A password reset email has been sent to ${email}.` };
-    } catch (error: any) {
-         console.error("Add staff failed:", error);
-        if (error.code === 'auth/email-already-in-use') {
-            return { success: false, message: "An account with this email address already exists." };
-        }
-        return { success: false, message: error.message || "An unknown error occurred." };
-    }
-}
-
-export async function addStudent(payload: any) {
-    const { name, email, phone, location, batchId } = payload;
-
-    try {
-        const studentDocRef = await addDoc(collection(db, "students"), {
-            name, email, phone, location, batchIds: [batchId],
-        });
-
-        if (batchId) {
-            const batchDocRef = doc(db, "batches", batchId);
-            await updateDoc(batchDocRef, {
-                studentIds: arrayUnion(studentDocRef.id)
-            });
-        }
-
-        return { success: true, message: `Student ${name} added successfully.` };
-    } catch (error: any) {
-        console.error("Add student failed:", error);
-        return { success: false, message: error.message || "An unknown error occurred." };
-    }
-}
-
-export async function addBatch(payload: { name: string, location: string, timings: string }) {
-  const { name, location, timings } = payload;
-  try {
-    await addDoc(collection(db, "batches"), {
-      name,
-      location,
-      timings,
-      studentIds: [], // Start with an empty batch
-    });
-    return { success: true, message: `Batch "${name}" added successfully.` };
-  } catch (error: any) {
-    console.error("Add batch failed:", error);
-    return { success: false, message: error.message || "An unknown error occurred." };
-  }
 }

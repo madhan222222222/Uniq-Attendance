@@ -52,17 +52,6 @@ export default function StudentsPage() {
           <CardTitle className="font-headline">Students</CardTitle>
           <CardDescription>Manage student profiles and information.</CardDescription>
         </div>
-        <AddStudentDialog 
-          batches={batches}
-          onStudentAdded={handleStudentAdded}
-          open={isDialogOpen}
-          onOpenChange={setIsDialogOpen}
-        >
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Student
-          </Button>
-        </AddStudentDialog>
       </CardHeader>
       <CardContent>
         {isLoading ? (

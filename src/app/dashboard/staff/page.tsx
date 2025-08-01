@@ -46,16 +46,6 @@ export default function StaffPage() {
           <CardTitle className="font-headline">Staff</CardTitle>
           <CardDescription>Manage staff profiles and permissions.</CardDescription>
         </div>
-        <AddStaffDialog 
-          onStaffAdded={handleStaffAdded}
-          open={isDialogOpen}
-          onOpenChange={setIsDialogOpen}
-        >
-          <Button>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add Staff
-          </Button>
-        </AddStaffDialog>
       </CardHeader>
       <CardContent>
         {isLoading ? (
