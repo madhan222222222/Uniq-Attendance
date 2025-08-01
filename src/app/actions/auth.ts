@@ -71,3 +71,4 @@ export async function registerUser(payload: any) {
         return { success: false, message: error.message || "An unknown error occurred during registration." };
     }
 }
+
