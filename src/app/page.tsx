@@ -1,28 +1,12 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
 import { LoginForm } from "@/components/auth/login-form";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, Loader2 } from "lucide-react";
+import { GraduationCap } from "lucide-react";
 import Link from "next/link";
-import { hasAdminUser } from './actions/auth';
 
 export default function Home() {
-  const [showRegister, setShowRegister] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    async function checkAdminExists() {
-      const adminExists = await hasAdminUser();
-      // Always show the link, but you could use this logic for other purposes.
-      // For now, we'll ensure the link is always available.
-      setShowRegister(true); 
-      setIsLoading(false);
-    }
-    checkAdminExists();
-  }, []);
-
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-background p-8">
@@ -38,23 +22,14 @@ export default function Home() {
       <div className="w-full max-w-sm pt-8">
         <LoginForm />
         <div className="mt-4 text-center text-sm">
-          {isLoading ? (
-            <div className="flex items-center justify-center text-muted-foreground">
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              <span>Checking admin status...</span>
-            </div>
-          ) : (
-            showRegister && (
-              <>
-                Want to create an account?{' '}
-                <Button variant="link" asChild className="p-0 h-auto">
-                  <Link href="/dashboard/register-admin?role=admin">
-                    Register as Admin
-                  </Link>
-                </Button>
-              </>
-            )
-          )}
+            <>
+              Want to create an account?{' '}
+              <Button variant="link" asChild className="p-0 h-auto">
+                <Link href="/dashboard/register-admin?role=admin">
+                  Register as Admin
+                </Link>
+              </Button>
+            </>
         </div>
       </div>
     </main>
