@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -121,6 +122,9 @@ export function RegisterAdminForm() {
                         <FormControl>
                             <Input type="password" placeholder="Secret admin code" {...field} />
                         </FormControl>
+                        <FormDescription>
+                            The default code is SECRET123.
+                        </FormDescription>
                         <FormMessage />
                     </FormItem>
                 )}
