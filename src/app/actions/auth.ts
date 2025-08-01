@@ -73,16 +73,16 @@ export async function registerUser(payload: any) {
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // Save user details in Firestore
+        // Save user details in Firestore 'users' collection for all roles
         await setDoc(doc(db, "users", user.uid), {
             uid: user.uid,
             name,
             email,
             role,
-            location: location || "Default", // Staff should have a location
+            location: location || "Default", 
         });
         
-        // Also add to staff/student collection based on role
+        // Also add to 'staff' collection if the role is 'admin' or 'staff'
         if (role === 'admin' || role === 'staff') {
             await setDoc(doc(db, "staff", user.uid), {
                 id: user.uid,
@@ -92,7 +92,6 @@ export async function registerUser(payload: any) {
                 location: location || "Default",
             });
         }
-
 
         return { success: true, message: "User registered successfully." };
 
