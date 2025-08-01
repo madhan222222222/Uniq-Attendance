@@ -1,3 +1,4 @@
+
 "use client";
 
 import { usePathname } from "next/navigation";
@@ -34,7 +35,8 @@ export function SidebarNav({ role }: SidebarNavProps) {
     { href: `/dashboard/batches${searchParams}`, label: "Batches", icon: BookCopy },
     { href: `/dashboard/attendance${searchParams}`, label: "Attendance", icon: CalendarCheck },
     { href: `/dashboard/reporting${searchParams}`, label: "Reporting", icon: LineChart },
-    { href: `/dashboard/register${searchParams}`, label: "Register User", icon: UserPlus },
+    { href: `/dashboard/register-admin${searchParams}`, label: "Register Admin", icon: UserPlus },
+    { href: `/dashboard/register-staff${searchParams}`, label: "Register Staff", icon: UserPlus },
   ];
 
   const staffNavItems = [

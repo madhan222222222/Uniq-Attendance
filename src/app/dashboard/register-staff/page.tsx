@@ -1,12 +1,12 @@
+
 "use client";
 
-import { RegisterForm } from "@/components/auth/register-form";
+import { RegisterStaffForm } from "@/components/auth/register-staff-form";
 import { useSearchParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
 
-export default function RegisterPage() {
+export default function RegisterStaffPage() {
     const searchParams = useSearchParams();
     const role = searchParams.get("role");
 
@@ -22,10 +22,11 @@ export default function RegisterPage() {
         )
     }
 
+
     return (
         <div className="flex flex-col items-center justify-center">
              <div className="w-full max-w-md">
-                <RegisterForm />
+                <RegisterStaffForm />
             </div>
         </div>
     );

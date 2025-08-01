@@ -1,3 +1,4 @@
+
 import { LoginForm } from "@/components/auth/login-form";
 import { Button } from "@/components/ui/button";
 import { GraduationCap } from "lucide-react";
@@ -20,7 +21,7 @@ export default function Home() {
          <div className="mt-4 text-center text-sm">
             Want to create an account?{' '}
             <Button variant="link" asChild className="p-0 h-auto">
-                <Link href="/dashboard/register?role=admin">
+                <Link href="/dashboard/register-admin?role=admin">
                     Register as Admin
                 </Link>
             </Button>

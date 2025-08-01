@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -31,14 +32,10 @@ const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required." }),
   email: z.string().email({ message: "Please enter a valid email." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-  role: z.enum(["admin", "staff"], {
-    required_error: "You need to select a role.",
-  }),
-  location: z.string().optional(),
-  adminCode: z.string().optional(),
+  location: z.string().min(1, { message: "Location is required for staff." }),
 });
 
-export function RegisterForm() {
+export function RegisterStaffForm() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -48,33 +45,19 @@ export function RegisterForm() {
       name: "",
       email: "",
       password: "",
-      adminCode: ""
     },
   });
-
-  const selectedRole = form.watch("role");
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
-    if (values.role === 'admin' && !values.adminCode) {
-        form.setError("adminCode", { type: "manual", message: "Admin code is required to register an admin." });
-        setIsLoading(false);
-        return;
-    }
-     if (values.role === 'staff' && !values.location) {
-        form.setError("location", { type: "manual", message: "Location is required for staff." });
-        setIsLoading(false);
-        return;
-    }
-
-    const result = await registerUser(values);
+    const result = await registerUser({...values, role: 'staff'});
     setIsLoading(false);
 
     if (result.success) {
       toast({
-        title: "User Registered",
-        description: `User ${values.name} has been created successfully.`,
+        title: "Staff Registered",
+        description: `Staff member ${values.name} has been created successfully.`,
       });
       form.reset(); 
     } else {
@@ -89,8 +72,8 @@ export function RegisterForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline text-2xl">Register New User</CardTitle>
-        <CardDescription>Create a new account for an admin or staff member.</CardDescription>
+        <CardTitle className="font-headline text-2xl">Register New Staff</CardTitle>
+        <CardDescription>Create a new account for a staff member.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -102,7 +85,7 @@ export function RegisterForm() {
                 <FormItem>
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="John Doe" {...field} />
+                    <Input placeholder="Jane Smith" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -115,7 +98,7 @@ export function RegisterForm() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="user@example.com" {...field} />
+                    <Input placeholder="staff@example.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -134,70 +117,29 @@ export function RegisterForm() {
                 </FormItem>
               )}
             />
-            <FormField
+           <FormField
               control={form.control}
-              name="role"
+              name="location"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Role</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <FormLabel>Location</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a role" />
+                        <SelectValue placeholder="Select a location" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="admin">Admin</SelectItem>
-                      <SelectItem value="staff">Staff</SelectItem>
+                      {locations.map(loc => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            {selectedRole === 'staff' && (
-               <FormField
-                  control={form.control}
-                  name="location"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Location</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a location" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {locations.map(loc => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-            )}
-            {selectedRole === 'admin' && (
-                <FormField
-                    control={form.control}
-                    name="adminCode"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Admin Code</FormLabel>
-                            <FormControl>
-                                <Input type="password" placeholder="Secret admin code" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
-            )}
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLoading ? 'Registering...' : 'Register User'}
+              {isLoading ? 'Registering...' : 'Register Staff'}
             </Button>
           </form>
         </Form>
