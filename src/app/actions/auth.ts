@@ -32,7 +32,7 @@ export async function resetPassword(payload: any) {
     const { email, password, adminCode } = payload;
 
     // Use a hardcoded secret code for password resets. In a real app, this should be more secure.
-    if (adminCode !== 'SECRET123') {
+    if (adminCode !== '234567') {
         return { success: false, message: "Invalid Secret Code." };
     }
 
