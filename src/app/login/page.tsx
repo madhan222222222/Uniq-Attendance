@@ -21,19 +21,12 @@ export default function LoginPage() {
       </div>
       <div className="w-full max-w-sm pt-8">
         <LoginForm />
-        <div className="mt-4 text-center text-sm flex justify-between items-center">
-            <div>
-                Don't have an account?{' '}
-                <Button variant="link" asChild className="p-0 h-auto">
-                <Link href="/register">
-                    Register
-                </Link>
-                </Button>
-            </div>
-             <Button variant="link" asChild className="p-0 h-auto">
-                <Link href="/forgot-password">
-                    Forgot Password?
-                </Link>
+        <div className="mt-4 text-center text-sm">
+            Don't have an account?{' '}
+            <Button variant="link" asChild className="p-0 h-auto">
+              <Link href="/register">
+                Register
+              </Link>
             </Button>
         </div>
       </div>

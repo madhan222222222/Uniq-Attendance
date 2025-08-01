@@ -2,7 +2,8 @@
 "use server";
 
 import { auth, db } from "@/lib/firebase";
-import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
+import { adminAuth } from "@/lib/firebase-admin";
+import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, updatePassword } from "firebase/auth";
 import { doc, setDoc, getDoc, collection, addDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
 export async function loginUser(payload: any) {
@@ -138,15 +139,15 @@ export async function addBatch(payload: { name: string, location: string, timing
   }
 }
 
-
-export async function resetPassword(email: string) {
+export async function changePassword(uid: string, newPassword: string): Promise<{success: boolean, message: string}> {
     try {
-        await sendPasswordResetEmail(auth, email);
-        // For security reasons, we don't reveal if the email was found or not.
-        return { success: true, message: "If an account with that email exists, a password reset link has been sent." };
+        // This is a privileged operation and must be done from a secure backend environment
+        await adminAuth.updateUser(uid, {
+            password: newPassword,
+        });
+        return { success: true, message: 'Password updated successfully.' };
     } catch (error: any) {
-        console.error("Password reset failed:", error);
-        // Even with other errors, present a generic message to prevent leaking information.
-        return { success: true, message: "If an account with that email exists, a password reset link has been sent." };
+        console.error("Password update failed:", error);
+        return { success: false, message: error.message || 'An unknown error occurred while updating the password.' };
     }
 }

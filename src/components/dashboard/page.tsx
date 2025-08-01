@@ -5,6 +5,7 @@ import { Users, BookUser, BookCopy, CalendarCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
+import { ChangePasswordCard } from "./change-password-card";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -13,6 +14,7 @@ export default function DashboardPage() {
     batches: 0,
     attendance: "N/A"
   });
+   const [user, setUser] = useState<{uid: string} | null>(null);
 
   useEffect(() => {
     async function fetchStats() {
@@ -31,6 +33,12 @@ export default function DashboardPage() {
       })
     }
     fetchStats();
+    
+    const userData = sessionStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+
   }, []);
 
   const today = new Date().toLocaleDateString(undefined, {
@@ -73,9 +81,7 @@ export default function DashboardPage() {
         />
       </div>
       <div>
-          <h3 className="text-2xl font-bold tracking-tight font-headline mb-4">Quick Actions</h3>
-          {/* Quick actions would go here */}
-          <p className="text-muted-foreground">This section would contain quick links for common tasks.</p>
+        {user && <ChangePasswordCard userId={user.uid} />}
       </div>
     </div>
   );
