@@ -12,7 +12,6 @@ import {
   LineChart,
   User,
   Presentation,
-  UserPlus,
 } from "lucide-react";
 import {
   SidebarMenu,
@@ -35,8 +34,6 @@ export function SidebarNav({ role }: SidebarNavProps) {
     { href: `/dashboard/batches${searchParams}`, label: "Batches", icon: BookCopy },
     { href: `/dashboard/attendance${searchParams}`, label: "Attendance", icon: CalendarCheck },
     { href: `/dashboard/reporting${searchParams}`, label: "Reporting", icon: LineChart },
-    { href: `/dashboard/register-admin${searchParams}`, label: "Register Admin", icon: UserPlus },
-    { href: `/dashboard/register-staff${searchParams}`, label: "Register Staff", icon: UserPlus },
   ];
 
   const staffNavItems = [

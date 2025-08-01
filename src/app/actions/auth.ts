@@ -1,3 +1,4 @@
+
 "use server";
 
 import { auth, db } from "@/lib/firebase";
@@ -37,15 +38,9 @@ export async function loginUser(payload: any) {
 
 export async function registerUser(payload: any) {
     console.log("New user registered:", payload);
-    const { name, email, password, role, adminCode, location } = payload;
+    const { name, email, password, role, location } = payload;
 
     try {
-        if (role === 'admin') {
-            if (adminCode !== SUPER_ADMIN_CODE) {
-                return { success: false, message: "Invalid Admin Code. Cannot register an admin." };
-            }
-        }
-
         // Create user in Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
