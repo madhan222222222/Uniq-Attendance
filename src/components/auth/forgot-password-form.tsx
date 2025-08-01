@@ -106,8 +106,8 @@ export function ForgotPasswordForm() {
                         <FormControl>
                             <Input type="password" placeholder="Secret admin code" {...field} />
                         </FormControl>
-                        <FormDescription>
-                           A secret code is required to reset a password. Hint: It's "234567".
+                         <FormDescription>
+                           A secret code is required to reset a password.
                         </FormDescription>
                         <FormMessage />
                     </FormItem>
