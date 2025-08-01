@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { changePassword } from "@/app/actions/auth";
+import { changePassword } from "@/app/actions/admin";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({

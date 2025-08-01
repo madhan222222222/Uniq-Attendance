@@ -2,7 +2,6 @@
 "use server";
 
 import { auth, db } from "@/lib/firebase";
-import { adminAuth } from "@/lib/firebase-admin";
 import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword, updatePassword } from "firebase/auth";
 import { doc, setDoc, getDoc, collection, addDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
@@ -34,7 +33,7 @@ export async function loginUser(payload: any) {
 
 export async function registerUser(payload: any) {
     console.log("New user registered:", payload);
-    const { name, email, password, role, location } = payload;
+    const { name, email, password, role, location } from payload;
 
     try {
         // Create user in Firebase Auth
@@ -137,17 +136,4 @@ export async function addBatch(payload: { name: string, location: string, timing
     console.error("Add batch failed:", error);
     return { success: false, message: error.message || "An unknown error occurred." };
   }
-}
-
-export async function changePassword(uid: string, newPassword: string): Promise<{success: boolean, message: string}> {
-    try {
-        // This is a privileged operation and must be done from a secure backend environment
-        await adminAuth.updateUser(uid, {
-            password: newPassword,
-        });
-        return { success: true, message: 'Password updated successfully.' };
-    } catch (error: any) {
-        console.error("Password update failed:", error);
-        return { success: false, message: error.message || 'An unknown error occurred while updating the password.' };
-    }
 }

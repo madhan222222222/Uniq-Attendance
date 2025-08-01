@@ -1,4 +1,6 @@
 
+"use server";
+
 import * as admin from 'firebase-admin';
 
 // This is a server-only file. It should not be imported into client components.
@@ -25,3 +27,17 @@ if (!admin.apps.length) {
 
 // Export the initialized admin auth instance
 export const adminAuth = admin.auth();
+
+
+export async function changePassword(uid: string, newPassword: string): Promise<{success: boolean, message: string}> {
+    try {
+        // This is a privileged operation and must be done from a secure backend environment
+        await adminAuth.updateUser(uid, {
+            password: newPassword,
+        });
+        return { success: true, message: 'Password updated successfully.' };
+    } catch (error: any) {
+        console.error("Password update failed:", error);
+        return { success: false, message: error.message || 'An unknown error occurred while updating the password.' };
+    }
+}
