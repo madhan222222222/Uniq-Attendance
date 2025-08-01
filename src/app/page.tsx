@@ -15,7 +15,9 @@ export default function Home() {
   useEffect(() => {
     async function checkAdminExists() {
       const adminExists = await hasAdminUser();
-      setShowRegister(!adminExists);
+      // Always show the link, but you could use this logic for other purposes.
+      // For now, we'll ensure the link is always available.
+      setShowRegister(true); 
       setIsLoading(false);
     }
     checkAdminExists();
