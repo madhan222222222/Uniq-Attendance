@@ -121,3 +121,19 @@ export async function addStudent(payload: any) {
         return { success: false, message: error.message || "An unknown error occurred." };
     }
 }
+
+export async function addBatch(payload: { name: string, location: string, timings: string }) {
+  const { name, location, timings } = payload;
+  try {
+    await addDoc(collection(db, "batches"), {
+      name,
+      location,
+      timings,
+      studentIds: [], // Start with an empty batch
+    });
+    return { success: true, message: `Batch "${name}" added successfully.` };
+  } catch (error: any) {
+    console.error("Add batch failed:", error);
+    return { success: false, message: error.message || "An unknown error occurred." };
+  }
+}

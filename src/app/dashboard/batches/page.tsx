@@ -16,21 +16,29 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { AddBatchDialog } from "@/components/batches/add-batch-dialog";
 
 export default function BatchesPage() {
   const [batches, setBatches] = useState<Batch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  async function fetchBatches() {
+    setIsLoading(true);
+    const querySnapshot = await getDocs(collection(db, "batches"));
+    const batchesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Batch[];
+    setBatches(batchesData);
+    setIsLoading(false);
+  }
 
   useEffect(() => {
-    async function fetchBatches() {
-      setIsLoading(true);
-      const querySnapshot = await getDocs(collection(db, "batches"));
-      const batchesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Batch[];
-      setBatches(batchesData);
-      setIsLoading(false);
-    }
     fetchBatches();
   }, []);
+
+  const handleBatchAdded = () => {
+    fetchBatches();
+    setIsDialogOpen(false);
+  }
 
   return (
     <Card>
@@ -39,10 +47,16 @@ export default function BatchesPage() {
           <CardTitle className="font-headline">Batches</CardTitle>
           <CardDescription>Manage course batches and student assignments.</CardDescription>
         </div>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Batch
-        </Button>
+        <AddBatchDialog
+          onBatchAdded={handleBatchAdded}
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+        >
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Batch
+          </Button>
+        </AddBatchDialog>
       </CardHeader>
       <CardContent>
         {isLoading ? (
