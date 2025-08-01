@@ -41,6 +41,7 @@ export function SidebarNav({ role }: SidebarNavProps) {
     { href: `/dashboard${searchParams}`, label: "Dashboard", icon: LayoutDashboard },
     { href: `/dashboard/attendance${searchParams}`, label: "Attendance", icon: CalendarCheck },
     { href: `/dashboard/students${searchParams}`, label: "Students", icon: Users },
+    { href: `/dashboard/batches${searchParams}`, label: "Batches", icon: BookCopy },
   ];
 
   const navItems = role === "admin" ? adminNavItems : staffNavItems;
