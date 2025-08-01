@@ -5,27 +5,10 @@ import { auth, db } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, getDoc, collection, query, where, getDocs, limit } from "firebase/firestore";
 
-const SUPER_ADMIN_CODE_DOC_ID = "super_admin_code";
-const SECRETS_COLLECTION = "secrets";
+// This is a temporary solution for the admin code.
+// In a production environment, this should be a secure environment variable.
+const SUPER_ADMIN_CODE = "SECRET123";
 
-async function getSuperAdminCode(): Promise<string | null> {
-    try {
-        const docRef = doc(db, SECRETS_COLLECTION, SUPER_ADMIN_CODE_DOC_ID);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            return docSnap.data().code;
-        } else {
-            // If the admin code doesn't exist, let's create one for the first time.
-            // In a real-world scenario, this should be seeded manually or through a secure setup process.
-            const newCode = "SECRET123";
-            await setDoc(docRef, { code: newCode });
-            return newCode;
-        }
-    } catch (error) {
-        console.error("Error getting super admin code:", error);
-        return null;
-    }
-}
 
 export async function loginUser(payload: any) {
     console.log("Login attempt:", payload);
@@ -33,8 +16,7 @@ export async function loginUser(payload: any) {
 
     try {
         if (role === 'admin') {
-            const superAdminCode = await getSuperAdminCode();
-            if (adminCode !== superAdminCode) {
+            if (adminCode !== SUPER_ADMIN_CODE) {
                 return { success: false, message: "Invalid Admin Code." };
             }
         }
@@ -63,8 +45,7 @@ export async function registerUser(payload: any) {
 
     try {
         if (role === 'admin') {
-            const superAdminCode = await getSuperAdminCode();
-            if (adminCode !== superAdminCode) {
+            if (adminCode !== SUPER_ADMIN_CODE) {
                 return { success: false, message: "Invalid Admin Code. Cannot register an admin." };
             }
         }
