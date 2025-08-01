@@ -3,12 +3,7 @@
 
 import { auth, db } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, getDoc, collection, query, where, getDocs, limit } from "firebase/firestore";
-
-// This is a temporary solution for the admin code.
-// In a production environment, this should be a secure environment variable.
-const SUPER_ADMIN_CODE = "SECRET123";
-
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
 export async function loginUser(payload: any) {
     console.log("Login attempt:", payload);
@@ -71,20 +66,8 @@ export async function registerUser(payload: any) {
         console.error("Registration failed:", error);
         // Check for specific errors
         if (error.code === 'auth/email-already-in-use') {
-            return { success: false, message: "A user with this email already exists." };
+            return { success: false, message: "An account with this email address already exists." };
         }
-        return { success: false, message: error.message || "An unknown error occurred." };
-    }
-}
-
-export async function hasAdminUser() {
-    try {
-        const q = query(collection(db, "users"), where("role", "==", "admin"), limit(1));
-        const querySnapshot = await getDocs(q);
-        return !querySnapshot.empty;
-    } catch (error) {
-        console.error("Error checking for admin user:", error);
-        // In case of error, assume an admin exists to be safe
-        return true;
+        return { success: false, message: error.message || "An unknown error occurred during registration." };
     }
 }
