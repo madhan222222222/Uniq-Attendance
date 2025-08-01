@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { format } from "date-fns"
-import { Calendar as CalendarIcon, Loader2 } from "lucide-react"
+import { Calendar as CalendarIcon, Loader2, Download } from "lucide-react"
 import { DateRange } from "react-day-picker"
 
 import { cn } from "@/lib/utils"
@@ -55,6 +55,42 @@ export default function ReportingPage() {
     handleApplyFilters();
      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+  
+  const handleDownload = () => {
+    if (reportData.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No data to download",
+        description: "Please apply filters to generate a report first.",
+      });
+      return;
+    }
+
+    const headers = ["Student", "Batch", "Location", "Date", "Topic Covered", "Status"];
+    const csvContent = [
+      headers.join(","),
+      ...reportData.map(row => [
+        `"${row.student}"`,
+        `"${row.batch}"`,
+        `"${row.batchLocation}"`,
+        `"${row.date}"`,
+        `"${row.topic.replace(/"/g, '""')}"`, // Handle quotes in topic
+        `"${row.status}"`
+      ].join(","))
+    ].join("\n");
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    if (link.href) {
+        URL.revokeObjectURL(link.href);
+    }
+    const url = URL.createObjectURL(blob);
+    link.href = url;
+    link.setAttribute("download", "attendance_report.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -115,6 +151,10 @@ export default function ReportingPage() {
             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Apply Filters
             </Button>
+          <Button onClick={handleDownload} disabled={reportData.length === 0} variant="outline">
+            <Download className="mr-2 h-4 w-4" />
+            Download Report
+          </Button>
         </CardContent>
       </Card>
       
