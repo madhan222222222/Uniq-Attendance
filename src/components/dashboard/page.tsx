@@ -1,3 +1,4 @@
+
 "use client"
 import { StatsCard } from "@/components/dashboard/stats-card";
 import { Users, BookUser, BookCopy, CalendarCheck } from "lucide-react";
@@ -15,9 +16,10 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function fetchStats() {
-      const studentsSnapshot = await getDocs(collection(db, "students"));
-      const staffSnapshot = await getDocs(collection(db, "staff"));
-      const batchesSnapshot = await getDocs(collection(db, "batches"));
+      const dbInstance = db;
+      const studentsSnapshot = await getDocs(collection(dbInstance, "students"));
+      const staffSnapshot = await getDocs(collection(dbInstance, "staff"));
+      const batchesSnapshot = await getDocs(collection(dbInstance, "batches"));
       // A more complex query would be needed for today's attendance percentage.
       // For now, we'll keep it simple.
 

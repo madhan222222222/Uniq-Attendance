@@ -52,7 +52,7 @@ export async function registerUser(payload: any) {
         // Also add to 'staff' collection if the role is 'staff'
         if (role === 'staff') {
             await setDoc(doc(db, "staff", user.uid), {
-                id: user.uid,
+                id: user.uid, // Explicitly set the document ID to the user's UID
                 name,
                 email,
                 role,
@@ -71,5 +71,3 @@ export async function registerUser(payload: any) {
         return { success: false, message: error.message || "An unknown error occurred during registration." };
     }
 }
-
-
