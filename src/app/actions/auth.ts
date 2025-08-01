@@ -1,4 +1,3 @@
-
 "use server";
 
 import { auth, db } from "@/lib/firebase";
@@ -7,7 +6,7 @@ import { doc, setDoc, getDoc, collection, query, where, getDocs, limit } from "f
 
 // This is a temporary solution for the admin code.
 // In a production environment, this should be a secure environment variable.
-const SUPER_ADMIN_CODE = process.env.SUPER_ADMIN_CODE;
+const SUPER_ADMIN_CODE = "SECRET123";
 
 
 export async function loginUser(payload: any) {
@@ -28,10 +27,10 @@ export async function loginUser(payload: any) {
         return { success: true, message: "Login successful.", user: { uid: user.uid, email: user.email, name: userDoc.data().name, ...userDoc.data() } };
     } catch (error: any) {
         console.error("Login failed:", error);
-        if (error.code === 'auth/user-not-found') {
-            return { success: false, message: "No user found with this email. Please register first." };
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+            return { success: false, message: "Invalid email or password. Please check your credentials or register." };
         }
-        return { success: false, message: error.message || "Invalid email or password." };
+        return { success: false, message: error.message || "An unknown error occurred during login." };
     }
 }
 
@@ -42,9 +41,6 @@ export async function registerUser(payload: any) {
 
     try {
         if (role === 'admin') {
-            if (!SUPER_ADMIN_CODE) {
-                return { success: false, message: "Admin code is not configured on the server." };
-            }
             if (adminCode !== SUPER_ADMIN_CODE) {
                 return { success: false, message: "Invalid Admin Code. Cannot register an admin." };
             }
