@@ -69,7 +69,8 @@ export function LoginForm() {
         title: "Login Successful",
         description: `Welcome back, ${result.user?.name}!`,
       });
-      // In a real app, you'd set a session/token here.
+      // Store user info in session storage to persist across page reloads
+      sessionStorage.setItem('user', JSON.stringify(result.user));
       router.push(`/dashboard?role=${values.role}`);
     } else {
         toast({

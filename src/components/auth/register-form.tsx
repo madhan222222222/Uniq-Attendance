@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Loader2 } from "lucide-react";
 import { registerUser } from "@/app/actions/auth";
 import { useToast } from "@/hooks/use-toast";
+import { locations } from "@/lib/data";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required." }),
@@ -33,6 +34,7 @@ const formSchema = z.object({
   role: z.enum(["admin", "staff"], {
     required_error: "You need to select a role.",
   }),
+  location: z.string().optional(),
   adminCode: z.string().optional(),
 });
 
@@ -57,6 +59,11 @@ export function RegisterForm() {
 
     if (values.role === 'admin' && !values.adminCode) {
         form.setError("adminCode", { type: "manual", message: "Admin code is required to register an admin." });
+        setIsLoading(false);
+        return;
+    }
+     if (values.role === 'staff' && !values.location) {
+        form.setError("location", { type: "manual", message: "Location is required for staff." });
         setIsLoading(false);
         return;
     }
@@ -151,6 +158,28 @@ export function RegisterForm() {
                 </FormItem>
               )}
             />
+            {selectedRole === 'staff' && (
+               <FormField
+                  control={form.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Location</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a location" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {locations.map(loc => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+            )}
             {selectedRole === 'admin' && (
                 <FormField
                     control={form.control}

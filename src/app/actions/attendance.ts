@@ -1,7 +1,9 @@
 "use server";
 
 import { absentReasonCode, AbsentReasonCodeInput } from "@/ai/flows/absent-reason-code";
-import { students, batches, locations } from "@/lib/data";
+import { db } from "@/lib/firebase";
+import { collection, addDoc, getDocs, query, where, Timestamp } from "firebase/firestore";
+import { students, batches, locations } from "@/lib/data"; // Keep for UI elements that might still need it temporarily
 
 export async function getAbsenceReasonSuggestion(input: AbsentReasonCodeInput) {
     try {
@@ -14,45 +16,78 @@ export async function getAbsenceReasonSuggestion(input: AbsentReasonCodeInput) {
 }
 
 export async function submitAttendance(payload: any) {
-    console.log("Attendance submitted:", payload);
-    // In a real app, you would save this to a database.
-    return { success: true, message: "Attendance submitted successfully." };
+    try {
+        const attendanceDate = new Date(payload.date);
+        const docRef = await addDoc(collection(db, "attendance"), {
+            ...payload,
+            date: Timestamp.fromDate(attendanceDate), // Store as Firestore Timestamp
+        });
+        console.log("Attendance submitted with ID: ", docRef.id);
+        return { success: true, message: "Attendance submitted successfully." };
+    } catch (error) {
+        console.error("Error submitting attendance: ", error);
+        return { success: false, message: "Failed to submit attendance." };
+    }
 }
 
-export type ReportData = { student: string; batch: string; date: string; status: 'Present' | 'Absent'; topic: string };
+export type ReportData = { 
+    student: string; 
+    batch: string; 
+    date: string; 
+    status: 'Present' | 'Absent'; 
+    topic: string,
+    batchLocation: string;
+};
 
 export async function getReportData(filters: { location?: string, from?: Date, to?: Date }): Promise<{ success: true, data: ReportData[] } | { success: false, error: string }> {
-  // In a real app, you would fetch this from a database based on filters.
-  // For this demo, we'll return some mock data and apply basic filtering.
-  const mockReportData: ReportData[] = [
-    { student: 'Aarav Kumar', batch: 'Morning Physics', date: '2024-07-28', status: 'Present', topic: 'Kinematics' },
-    { student: 'Priya Singh', batch: 'Morning Physics', date: '2024-07-28', status: 'Absent', topic: 'Kinematics' },
-    { student: 'Diya Sharma', batch: 'Evening Maths', date: '2024-07-27', status: 'Present', topic: 'Calculus' },
-    { student: 'Rohan Patel', batch: 'Weekend Chemistry', date: '2024-07-26', status: 'Present', topic: 'Organic Chemistry' },
-  ];
+  try {
+    let q = query(collection(db, "attendance"));
 
-  const studentLocations: Record<string, string> = {};
-  students.forEach(s => studentLocations[s.name] = s.location);
+    if (filters.from) {
+        q = query(q, where("date", ">=", Timestamp.fromDate(filters.from)));
+    }
+    if (filters.to) {
+        // Add 1 day to 'to' date to make it inclusive
+        const toDate = new Date(filters.to);
+        toDate.setDate(toDate.getDate() + 1);
+        q = query(q, where("date", "<", Timestamp.fromDate(toDate)));
+    }
+    
+    const querySnapshot = await getDocs(q);
+    const reportData: ReportData[] = [];
 
-  const batchLocations: Record<string, string> = {};
-  batches.forEach(b => batchLocations[b.name] = b.location);
+    const studentDocs = await getDocs(collection(db, "students"));
+    const studentMap = new Map(studentDocs.docs.map(d => [d.id, d.data()]));
 
-  let filteredData = mockReportData;
+    const batchDocs = await getDocs(collection(db, "batches"));
+    const batchMap = new Map(batchDocs.docs.map(d => [d.id, d.data()]));
 
-  if (filters.location) {
-      const lowerCaseLocation = filters.location.toLowerCase();
-      const locationMatch = locations.find(l => l.toLowerCase() === lowerCaseLocation);
-      if(locationMatch) {
-        filteredData = filteredData.filter(d => (batchLocations[d.batch] === locationMatch));
+    querySnapshot.forEach(doc => {
+      const data = doc.data();
+      const batchInfo = batchMap.get(data.batchId);
+      
+      if(filters.location && filters.location !== 'all' && batchInfo?.location.toLowerCase() !== filters.location.toLowerCase()) {
+        return; // Skip if location filter doesn't match
       }
-  }
 
-  if (filters.from && filters.to) {
-    filteredData = filteredData.filter(d => {
-        const recordDate = new Date(d.date);
-        return recordDate >= filters.from! && recordDate <= filters.to!;
-    })
+      Object.entries(data.attendance).forEach(([studentId, status]) => {
+          const studentInfo = studentMap.get(studentId);
+          if (studentInfo && batchInfo) {
+              reportData.push({
+                  student: studentInfo.name,
+                  batch: batchInfo.name,
+                  date: (data.date.toDate() as Date).toLocaleDateString(),
+                  status: status === 'present' ? 'Present' : 'Absent',
+                  topic: data.todayTopic,
+                  batchLocation: batchInfo.location,
+              });
+          }
+      })
+    });
+    
+    return { success: true, data: reportData };
+  } catch (error) {
+    console.error("Error fetching report data: ", error);
+    return { success: false, error: "Failed to fetch report data." };
   }
-
-  return { success: true, data: filteredData };
 }

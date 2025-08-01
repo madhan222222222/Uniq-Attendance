@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   SidebarProvider,
@@ -16,6 +16,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { GraduationCap, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { auth } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
 
 export default function DashboardLayout({
   children,
@@ -25,10 +27,36 @@ export default function DashboardLayout({
   const searchParams = useSearchParams();
   const router = useRouter();
   const role = searchParams.get("role") || "staff"; // Default to staff
+  const [user, setUser] = useState<{name: string, email: string} | null>(null);
 
-  const handleLogout = () => {
-    router.push('/');
+  useEffect(() => {
+      const userData = sessionStorage.getItem('user');
+      if (userData) {
+          setUser(JSON.parse(userData));
+      } else {
+          // If no user data, redirect to login
+          router.push('/');
+      }
+  }, [router]);
+
+
+  const handleLogout = async () => {
+    try {
+        await signOut(auth);
+        sessionStorage.removeItem('user');
+        router.push('/');
+    } catch (error) {
+        console.error("Logout failed:", error);
+    }
   };
+
+  if (!user) {
+      return (
+          <div className="flex h-screen items-center justify-center">
+              <p>Loading...</p>
+          </div>
+      )
+  }
 
   return (
     <SidebarProvider>
@@ -52,12 +80,12 @@ export default function DashboardLayout({
           <div className="flex items-center gap-3">
             <Avatar>
               <AvatarImage src="https://placehold.co/40x40.png" alt="User avatar" data-ai-hint="profile picture" />
-              <AvatarFallback>{role.charAt(0).toUpperCase()}</AvatarFallback>
+              <AvatarFallback>{user.name ? user.name.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-              <span className="font-semibold text-sm text-sidebar-foreground capitalize">{role}</span>
+              <span className="font-semibold text-sm text-sidebar-foreground capitalize">{user.name}</span>
               <span className="text-xs text-muted-foreground">
-                {role}@example.com
+                {user.email}
               </span>
             </div>
             <Button
