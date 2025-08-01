@@ -14,7 +14,6 @@ export default function DashboardPage() {
     batches: 0,
     attendance: "N/A"
   });
-   const [user, setUser] = useState<{uid: string} | null>(null);
 
   useEffect(() => {
     async function fetchStats() {
@@ -33,12 +32,6 @@ export default function DashboardPage() {
       })
     }
     fetchStats();
-    
-    const userData = sessionStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-
   }, []);
 
   const today = new Date().toLocaleDateString(undefined, {
@@ -81,7 +74,7 @@ export default function DashboardPage() {
         />
       </div>
       <div>
-        {user && <ChangePasswordCard />}
+        <ChangePasswordCard />
       </div>
     </div>
   );
