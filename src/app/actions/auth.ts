@@ -12,15 +12,9 @@ const SUPER_ADMIN_CODE = "SECRET123";
 
 export async function loginUser(payload: any) {
     console.log("Login attempt:", payload);
-    const { email, password, role, adminCode } = payload;
+    const { email, password, role } = payload;
 
     try {
-        if (role === 'admin') {
-            if (adminCode !== SUPER_ADMIN_CODE) {
-                return { success: false, message: "Invalid Admin Code." };
-            }
-        }
-
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
@@ -34,6 +28,9 @@ export async function loginUser(payload: any) {
         return { success: true, message: "Login successful.", user: { uid: user.uid, email: user.email, name: userDoc.data().name, ...userDoc.data() } };
     } catch (error: any) {
         console.error("Login failed:", error);
+        if (error.code === 'auth/user-not-found') {
+            return { success: false, message: "No user found with this email. Please register first." };
+        }
         return { success: false, message: error.message || "Invalid email or password." };
     }
 }

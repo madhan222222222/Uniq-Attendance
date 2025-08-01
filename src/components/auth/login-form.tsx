@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -33,7 +34,6 @@ const formSchema = z.object({
   role: z.enum(["admin", "staff"], {
     required_error: "You need to select a role.",
   }),
-  adminCode: z.string().optional(),
 });
 
 export function LoginForm() {
@@ -46,21 +46,12 @@ export function LoginForm() {
     defaultValues: {
       email: "",
       password: "",
-      adminCode: "",
     },
   });
-
-  const selectedRole = form.watch("role");
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     
-    if (values.role === 'admin' && !values.adminCode) {
-        form.setError("adminCode", { type: "manual", message: "Admin code is required." });
-        setIsLoading(false);
-        return;
-    }
-
     const result = await loginUser(values);
     setIsLoading(false);
 
@@ -140,21 +131,6 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
-            {selectedRole === 'admin' && (
-              <FormField
-                control={form.control}
-                name="adminCode"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Admin Code</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="Secret admin code" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Login
