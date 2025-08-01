@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -29,6 +30,7 @@ const formSchema = z.object({
 
 export function RegisterAdminForm() {
   const { toast } = useToast();
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -50,9 +52,9 @@ export function RegisterAdminForm() {
     if (result.success) {
       toast({
         title: "Admin Registered",
-        description: `Admin ${values.name} has been created successfully.`,
+        description: `Admin ${values.name} has been created. Please login.`,
       });
-      form.reset(); 
+      router.push('/'); 
     } else {
       toast({
         variant: "destructive",

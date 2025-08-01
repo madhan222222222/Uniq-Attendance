@@ -1,8 +1,9 @@
+
 "use server";
 
 import { auth, db } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, query, where, getDocs, limit } from "firebase/firestore";
 
 const SUPER_ADMIN_CODE_DOC_ID = "super_admin_code";
 const SECRETS_COLLECTION = "secrets";
@@ -102,5 +103,17 @@ export async function registerUser(payload: any) {
             return { success: false, message: "A user with this email already exists." };
         }
         return { success: false, message: error.message || "An unknown error occurred." };
+    }
+}
+
+export async function hasAdminUser() {
+    try {
+        const q = query(collection(db, "users"), where("role", "==", "admin"), limit(1));
+        const querySnapshot = await getDocs(q);
+        return !querySnapshot.empty;
+    } catch (error) {
+        console.error("Error checking for admin user:", error);
+        // In case of error, assume an admin exists to be safe
+        return true;
     }
 }
