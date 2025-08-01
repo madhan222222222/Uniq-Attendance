@@ -4,13 +4,12 @@ import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  "projectId": "attendance-ai-xur9q",
-  "appId": "1:30376040039:web:c096dda53175e0243366c2",
-  "storageBucket": "attendance-ai-xur9q.firebasestorage.app",
-  "apiKey": "AIzaSyAwEolx81dICW505joMYE03E6T92Bex5vg",
-  "authDomain": "attendance-ai-xur9q.firebaseapp.com",
-  "measurementId": "",
-  "messagingSenderId": "30376040039"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
 // Initialize Firebase
