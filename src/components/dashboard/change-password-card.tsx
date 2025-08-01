@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { getAuth, updatePassword, onAuthStateChanged } from "firebase/auth";
+import { getAuth, updatePassword } from "firebase/auth";
 
 const formSchema = z.object({
   newPassword: z.string().min(6, { message: "Password must be at least 6 characters." }),
