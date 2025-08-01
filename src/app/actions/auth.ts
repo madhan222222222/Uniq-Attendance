@@ -2,7 +2,7 @@
 "use server";
 
 import { auth, db } from "@/lib/firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, getDoc, collection, addDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
 export async function loginUser(payload: any) {
@@ -136,4 +136,18 @@ export async function addBatch(payload: { name: string, location: string, timing
     console.error("Add batch failed:", error);
     return { success: false, message: error.message || "An unknown error occurred." };
   }
+}
+
+export async function resetPassword(email: string) {
+    try {
+        await sendPasswordResetEmail(auth, email);
+        return { success: true, message: "Password reset email sent. Please check your inbox." };
+    } catch (error: any) {
+        console.error("Password reset failed:", error);
+        if (error.code === 'auth/user-not-found') {
+            // To prevent email enumeration, we don't reveal if the user was found.
+             return { success: true, message: "Password reset email sent. Please check your inbox." };
+        }
+        return { success: false, message: error.message || "An unknown error occurred." };
+    }
 }
