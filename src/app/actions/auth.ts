@@ -7,7 +7,7 @@ import { doc, setDoc, getDoc, collection, query, where, getDocs, limit } from "f
 
 // This is a temporary solution for the admin code.
 // In a production environment, this should be a secure environment variable.
-const SUPER_ADMIN_CODE = "SECRET123";
+const SUPER_ADMIN_CODE = process.env.SUPER_ADMIN_CODE;
 
 
 export async function loginUser(payload: any) {
@@ -42,6 +42,9 @@ export async function registerUser(payload: any) {
 
     try {
         if (role === 'admin') {
+            if (!SUPER_ADMIN_CODE) {
+                return { success: false, message: "Admin code is not configured on the server." };
+            }
             if (adminCode !== SUPER_ADMIN_CODE) {
                 return { success: false, message: "Invalid Admin Code. Cannot register an admin." };
             }

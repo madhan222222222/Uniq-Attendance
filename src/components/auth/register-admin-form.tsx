@@ -123,7 +123,7 @@ export function RegisterAdminForm() {
                             <Input type="password" placeholder="Secret admin code" {...field} />
                         </FormControl>
                         <FormDescription>
-                            This is a secret code required to create the first admin. The default is SECRET123.
+                            A secret code is required to create the first admin.
                         </FormDescription>
                         <FormMessage />
                     </FormItem>
