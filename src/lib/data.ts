@@ -6,13 +6,16 @@ export type Student = {
   id: string;
   name: string;
   email: string;
+  phone: string;
   location: string;
+  batchIds: string[];
 };
 
 export type Staff = {
   id: string;
   name: string;
   email: string;
+  phone: string;
   location: string;
   role: 'admin' | 'staff';
 };

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
-import type { Student } from "@/lib/data";
+import type { Student, Batch } from "@/lib/data";
 import {
   Table,
   TableBody,
@@ -15,21 +15,35 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Loader2 } from "lucide-react";
+import { AddStudentDialog } from "@/components/students/add-student-dialog";
 
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
+  const [batches, setBatches] = useState<Batch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  async function fetchStudentsAndBatches() {
+    setIsLoading(true);
+    const studentsQuerySnapshot = await getDocs(collection(db, "students"));
+    const studentsData = studentsQuerySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Student[];
+    setStudents(studentsData);
+
+    const batchesQuerySnapshot = await getDocs(collection(db, "batches"));
+    const batchesData = batchesQuerySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Batch[];
+    setBatches(batchesData);
+
+    setIsLoading(false);
+  }
 
   useEffect(() => {
-    async function fetchStudents() {
-      setIsLoading(true);
-      const querySnapshot = await getDocs(collection(db, "students"));
-      const studentsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Student[];
-      setStudents(studentsData);
-      setIsLoading(false);
-    }
-    fetchStudents();
+    fetchStudentsAndBatches();
   }, []);
+
+  const handleStudentAdded = () => {
+    fetchStudentsAndBatches(); // Refetch data
+    setIsDialogOpen(false); // Close dialog
+  }
 
   return (
     <Card>
@@ -38,10 +52,17 @@ export default function StudentsPage() {
           <CardTitle className="font-headline">Students</CardTitle>
           <CardDescription>Manage student profiles and information.</CardDescription>
         </div>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Student
-        </Button>
+        <AddStudentDialog 
+          batches={batches}
+          onStudentAdded={handleStudentAdded}
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+        >
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Student
+          </Button>
+        </AddStudentDialog>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -54,6 +75,7 @@ export default function StudentsPage() {
               <TableRow>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
+                <TableHead>Phone</TableHead>
                 <TableHead>Location</TableHead>
               </TableRow>
             </TableHeader>
@@ -62,6 +84,7 @@ export default function StudentsPage() {
                 <TableRow key={student.id}>
                   <TableCell className="font-medium">{student.name}</TableCell>
                   <TableCell>{student.email}</TableCell>
+                   <TableCell>{student.phone}</TableCell>
                   <TableCell>{student.location}</TableCell>
                 </TableRow>
               ))}

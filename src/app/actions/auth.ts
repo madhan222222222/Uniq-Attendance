@@ -3,7 +3,7 @@
 
 import { auth, db } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, addDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
 export async function loginUser(payload: any) {
     console.log("Login attempt:", payload);
@@ -57,6 +57,7 @@ export async function registerUser(payload: any) {
                 email,
                 role,
                 location: location,
+                phone: payload.phone || '',
             });
         }
 
@@ -69,5 +70,54 @@ export async function registerUser(payload: any) {
             return { success: false, message: "An account with this email address already exists." };
         }
         return { success: false, message: error.message || "An unknown error occurred during registration." };
+    }
+}
+
+export async function addStaff(payload: any) {
+    const { name, email, phone, location } = payload;
+    // For staff, we can create a temporary random password
+    const password = Math.random().toString(36).slice(-8);
+
+    try {
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+        
+        await setDoc(doc(db, "users", user.uid), {
+            uid: user.uid, name, email, role: 'staff', location,
+        });
+
+        await setDoc(doc(db, "staff", user.uid), {
+            id: user.uid, name, email, phone, location, role: 'staff',
+        });
+
+        return { success: true, message: `Staff member ${name} added successfully. They can now login with email and temporary password: ${password}` };
+    } catch (error: any) {
+         console.error("Add staff failed:", error);
+        if (error.code === 'auth/email-already-in-use') {
+            return { success: false, message: "An account with this email address already exists." };
+        }
+        return { success: false, message: error.message || "An unknown error occurred." };
+    }
+}
+
+export async function addStudent(payload: any) {
+    const { name, email, phone, location, batchId } = payload;
+
+    try {
+        const studentDocRef = await addDoc(collection(db, "students"), {
+            name, email, phone, location, batchIds: [batchId],
+        });
+
+        if (batchId) {
+            const batchDocRef = doc(db, "batches", batchId);
+            await updateDoc(batchDocRef, {
+                studentIds: arrayUnion(studentDocRef.id)
+            });
+        }
+
+        return { success: true, message: `Student ${name} added successfully.` };
+    } catch (error: any) {
+        console.error("Add student failed:", error);
+        return { success: false, message: error.message || "An unknown error occurred." };
     }
 }

@@ -15,22 +15,29 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Loader2 } from "lucide-react";
+import { AddStaffDialog } from "@/components/staff/add-staff-dialog";
 
 export default function StaffPage() {
   const [staff, setStaff] = useState<Staff[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  async function fetchStaff() {
+    setIsLoading(true);
+    const querySnapshot = await getDocs(collection(db, "staff"));
+    const staffData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Staff[];
+    setStaff(staffData);
+    setIsLoading(false);
+  }
 
   useEffect(() => {
-    async function fetchStaff() {
-      setIsLoading(true);
-      const querySnapshot = await getDocs(collection(db, "staff"));
-      const staffData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Staff[];
-      setStaff(staffData);
-      setIsLoading(false);
-    }
     fetchStaff();
   }, []);
 
+  const handleStaffAdded = () => {
+    fetchStaff();
+    setIsDialogOpen(false);
+  }
 
   return (
     <Card>
@@ -39,10 +46,16 @@ export default function StaffPage() {
           <CardTitle className="font-headline">Staff</CardTitle>
           <CardDescription>Manage staff profiles and permissions.</CardDescription>
         </div>
-        <Button>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add Staff
-        </Button>
+        <AddStaffDialog 
+          onStaffAdded={handleStaffAdded}
+          open={isDialogOpen}
+          onOpenChange={setIsDialogOpen}
+        >
+          <Button>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Staff
+          </Button>
+        </AddStaffDialog>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -55,6 +68,7 @@ export default function StaffPage() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Email</TableHead>
+              <TableHead>Phone</TableHead>
               <TableHead>Location</TableHead>
               <TableHead>Role</TableHead>
             </TableRow>
@@ -64,6 +78,7 @@ export default function StaffPage() {
               <TableRow key={s.id}>
                 <TableCell className="font-medium">{s.name}</TableCell>
                 <TableCell>{s.email}</TableCell>
+                <TableCell>{s.phone}</TableCell>
                 <TableCell>{s.location}</TableCell>
                 <TableCell className="capitalize">{s.role}</TableCell>
               </TableRow>

@@ -10,14 +10,13 @@ import {
   BookCopy,
   CalendarCheck,
   LineChart,
-  User,
-  Presentation,
 } from "lucide-react";
 import {
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
+import { useSearchParams } from "next/navigation";
 
 type SidebarNavProps = {
   role: "admin" | "staff";
@@ -25,21 +24,23 @@ type SidebarNavProps = {
 
 export function SidebarNav({ role }: SidebarNavProps) {
   const pathname = usePathname();
-  const searchParams = `?role=${role}`;
+  const searchParamsHook = useSearchParams();
+  const roleQuery = searchParamsHook.get('role');
+  const searchParams = `?role=${roleQuery}`;
 
   const adminNavItems = [
     { href: `/dashboard${searchParams}`, label: "Dashboard", icon: LayoutDashboard },
+    { href: `/dashboard/attendance${searchParams}`, label: "Attendance", icon: CalendarCheck },
     { href: `/dashboard/students${searchParams}`, label: "Students", icon: Users },
     { href: `/dashboard/staff${searchParams}`, label: "Staff", icon: BookUser },
     { href: `/dashboard/batches${searchParams}`, label: "Batches", icon: BookCopy },
-    { href: `/dashboard/attendance${searchParams}`, label: "Attendance", icon: CalendarCheck },
     { href: `/dashboard/reporting${searchParams}`, label: "Reporting", icon: LineChart },
   ];
 
   const staffNavItems = [
     { href: `/dashboard${searchParams}`, label: "Dashboard", icon: LayoutDashboard },
-    { href: `/dashboard/students${searchParams}`, label: "Students", icon: User },
-    { href: `/dashboard/attendance${searchParams}`, label: "Attendance", icon: Presentation },
+    { href: `/dashboard/attendance${searchParams}`, label: "Attendance", icon: CalendarCheck },
+    { href: `/dashboard/students${searchParams}`, label: "Students", icon: Users },
   ];
 
   const navItems = role === "admin" ? adminNavItems : staffNavItems;
