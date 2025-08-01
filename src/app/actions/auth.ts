@@ -52,7 +52,7 @@ export async function registerUser(payload: any) {
         // Also add to 'staff' collection if the role is 'staff'
         if (role === 'staff') {
             await setDoc(doc(db, "staff", user.uid), {
-                id: user.uid, // Ensure the document ID is the user's UID
+                id: user.uid, 
                 name,
                 email,
                 role,
