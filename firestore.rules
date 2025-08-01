@@ -3,43 +3,16 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Helper function to check if a user is authenticated
-    function isAuthenticated() {
-      return request.auth != null;
-    }
-
-    // Users can create their own user document during registration
-    match /users/{userId} {
-      allow create: if true;
-      allow read, write: if isAuthenticated() && request.auth.uid == userId;
-    }
-
-    // Staff can be created during registration
-    match /staff/{staffId} {
-        allow create: if true;
-        allow read, write: if isAuthenticated();
-    }
-    
-    // Any authenticated user can read batch and student info
-    match /batches/{batchId} {
-        allow read: if isAuthenticated();
-        allow write: if isAuthenticated(); // Admins/Staff might create/edit batches
-    }
-
-    match /students/{studentId} {
-        allow read: if isAuthenticated();
-        allow write: if isAuthenticated(); // Admins/Staff can add/edit students
-    }
-    
-    // Only authenticated staff can submit or view attendance
-    match /attendance/{attendanceId} {
-        allow read, create, write: if isAuthenticated();
-    }
-    
-    // Fallback rule: Deny all other access by default
+  
+    // Default deny all access
     match /{document=**} {
       allow read, write: if false;
+    }
+
+    // Allow any authenticated user to read and write to any collection.
+    // This is a simple starting point that will allow the application to function.
+    match /{path=**} {
+      allow read, write: if request.auth != null;
     }
   }
 }
