@@ -22,6 +22,13 @@ export default function LoginPage() {
       <div className="w-full max-w-sm pt-8">
         <LoginForm />
         <div className="mt-4 text-center text-sm">
+            <Button variant="link" asChild className="p-0 h-auto">
+              <Link href="/forgot-password">
+                Forgot Password?
+              </Link>
+            </Button>
+        </div>
+        <div className="mt-1 text-center text-sm">
             Don't have an account?{' '}
             <Button variant="link" asChild className="p-0 h-auto">
               <Link href="/register">
