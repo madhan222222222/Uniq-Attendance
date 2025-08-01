@@ -10,6 +10,8 @@ export type Staff = {
   name: string;
   email: string;
   location: string;
+  role: 'admin' | 'staff';
+  password?: string;
 };
 
 export type Batch = {
@@ -35,8 +37,8 @@ export const students: Student[] = [
 ];
 
 export const staff: Staff[] = [
-  { id: "st1", name: "Mr. Ramesh", email: "ramesh@example.com", location: "Chennai" },
-  { id: "st2", name: "Ms. Sunita", email: "sunita@example.com", location: "Bangalore" },
+  { id: "st1", name: "Mr. Ramesh", email: "ramesh@example.com", location: "Chennai", role: 'admin', password: 'password' },
+  { id: "st2", name: "Ms. Sunita", email: "sunita@example.com", location: "Bangalore", role: 'staff', password: 'password' },
 ];
 
 export const batches: Batch[] = [

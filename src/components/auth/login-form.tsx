@@ -24,6 +24,8 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
+import { loginUser } from "@/app/actions/auth";
+import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
@@ -31,10 +33,12 @@ const formSchema = z.object({
   role: z.enum(["admin", "staff"], {
     required_error: "You need to select a role.",
   }),
+  adminCode: z.string().optional(),
 });
 
 export function LoginForm() {
   const router = useRouter();
+  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -42,17 +46,38 @@ export function LoginForm() {
     defaultValues: {
       email: "",
       password: "",
+      adminCode: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
+  const selectedRole = form.watch("role");
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    
+    if (values.role === 'admin' && !values.adminCode) {
+        form.setError("adminCode", { type: "manual", message: "Admin code is required." });
+        setIsLoading(false);
+        return;
+    }
+
+    const result = await loginUser(values);
+    setIsLoading(false);
+
+    if (result.success) {
+      toast({
+        title: "Login Successful",
+        description: `Welcome back, ${result.user?.name}!`,
+      });
       // In a real app, you'd set a session/token here.
-      // For this demo, we'll use a query param to pass the role.
       router.push(`/dashboard?role=${values.role}`);
-    }, 1000);
+    } else {
+        toast({
+            variant: "destructive",
+            title: "Login Failed",
+            description: result.message,
+        })
+    }
   }
 
   return (
@@ -114,6 +139,21 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
+            {selectedRole === 'admin' && (
+              <FormField
+                control={form.control}
+                name="adminCode"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Admin Code</FormLabel>
+                    <FormControl>
+                      <Input type="password" placeholder="Secret admin code" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Login

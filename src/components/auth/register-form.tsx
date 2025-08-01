@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -34,10 +33,10 @@ const formSchema = z.object({
   role: z.enum(["admin", "staff"], {
     required_error: "You need to select a role.",
   }),
+  adminCode: z.string().optional(),
 });
 
 export function RegisterForm() {
-  const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
 
@@ -47,11 +46,21 @@ export function RegisterForm() {
       name: "",
       email: "",
       password: "",
+      adminCode: ""
     },
   });
 
+  const selectedRole = form.watch("role");
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
+
+    if (values.role === 'admin' && !values.adminCode) {
+        form.setError("adminCode", { type: "manual", message: "Admin code is required to register an admin." });
+        setIsLoading(false);
+        return;
+    }
+
     const result = await registerUser(values);
     setIsLoading(false);
 
@@ -60,7 +69,7 @@ export function RegisterForm() {
         title: "User Registered",
         description: `User ${values.name} has been created successfully.`,
       });
-      form.reset(); // Reset form after successful submission
+      form.reset(); 
     } else {
       toast({
         variant: "destructive",
@@ -142,6 +151,21 @@ export function RegisterForm() {
                 </FormItem>
               )}
             />
+            {selectedRole === 'admin' && (
+                <FormField
+                    control={form.control}
+                    name="adminCode"
+                    render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Admin Code</FormLabel>
+                            <FormControl>
+                                <Input type="password" placeholder="Secret admin code" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )}
+                />
+            )}
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {isLoading ? 'Registering...' : 'Register User'}
