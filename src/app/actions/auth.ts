@@ -2,6 +2,8 @@
 "use server";
 
 import { auth, db } from "@/lib/firebase";
+import { getAdminApp } from "@/lib/firebase-admin";
+import { getAuth as getAdminAuth } from "firebase-admin/auth";
 import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc, getDoc, collection, addDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
@@ -138,6 +140,31 @@ export async function addBatch(payload: { name: string, location: string, timing
   }
 }
 
+export async function resetPasswordInApp(payload: { email: string, newPassword: string }) {
+    const { email, newPassword } = payload;
+    try {
+        const adminApp = getAdminApp();
+        const adminAuth = getAdminAuth(adminApp);
+        
+        // Get user by email
+        const userRecord = await adminAuth.getUserByEmail(email);
+        
+        // Update the password
+        await adminAuth.updateUser(userRecord.uid, {
+            password: newPassword,
+        });
+
+        return { success: true, message: "Password updated successfully. You can now login with your new password." };
+    } catch (error: any) {
+        console.error("In-app password reset failed:", error);
+        if (error.code === 'auth/user-not-found') {
+             return { success: false, message: "No user found with this email address." };
+        }
+        return { success: false, message: error.message || "An unknown error occurred." };
+    }
+}
+
+// Kept for reference, but the new flow doesn't use it.
 export async function resetPassword(email: string) {
     try {
         await sendPasswordResetEmail(auth, email);

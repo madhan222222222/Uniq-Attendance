@@ -18,38 +18,45 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { resetPassword } from "@/app/actions/auth";
+import { resetPasswordInApp } from "@/app/actions/auth";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
+  newPassword: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  confirmPassword: z.string().min(6, { message: "Password must be at least 6 characters." }),
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: "Passwords do not match.",
+  path: ["confirmPassword"],
 });
+
 
 export function ForgotPasswordForm() {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
+      newPassword: "",
+      confirmPassword: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     
-    const result = await resetPassword(values.email);
+    const result = await resetPasswordInApp({ email: values.email, newPassword: values.newPassword });
     setIsLoading(false);
 
     if (result.success) {
       toast({
-        title: "Email Sent",
+        title: "Password Reset Successful",
         description: result.message,
       });
-      setIsSubmitted(true);
+      router.push('/login');
     } else {
         toast({
             variant: "destructive",
@@ -59,28 +66,15 @@ export function ForgotPasswordForm() {
     }
   }
 
-  if (isSubmitted) {
-      return (
-        <Card>
-            <CardHeader>
-                <CardTitle className="font-headline text-2xl">Check Your Email</CardTitle>
-                <CardDescription>
-                    We've sent a password reset link to the email address you provided. Please check your inbox and spam folder.
-                </CardDescription>
-            </CardHeader>
-        </Card>
-      )
-  }
-
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline text-2xl">Forgot Password</CardTitle>
-        <CardDescription>Enter your email and we'll send you a link to reset your password.</CardDescription>
+        <CardTitle className="font-headline text-2xl">Reset Password</CardTitle>
+        <CardDescription>Enter your email and a new password to reset your account.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
               name="email"
@@ -94,9 +88,35 @@ export function ForgotPasswordForm() {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="newPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>New Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="••••••••" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm New Password</FormLabel>
+                  <FormControl>
+                    <Input type="password" placeholder="••••••••" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {isLoading ? 'Sending...' : 'Send Reset Email'}
+              {isLoading ? 'Resetting...' : 'Reset Password'}
             </Button>
           </form>
         </Form>
