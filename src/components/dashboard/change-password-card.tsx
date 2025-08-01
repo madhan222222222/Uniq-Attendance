@@ -17,8 +17,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
-import { changePassword } from "@/app/actions/admin";
 import { useToast } from "@/hooks/use-toast";
+import { getAuth, updatePassword, onAuthStateChanged } from "firebase/auth";
 
 const formSchema = z.object({
   newPassword: z.string().min(6, { message: "Password must be at least 6 characters." }),
@@ -28,13 +28,10 @@ const formSchema = z.object({
     path: ["confirmPassword"],
 });
 
-type ChangePasswordCardProps = {
-    userId: string;
-}
-
-export function ChangePasswordCard({ userId }: ChangePasswordCardProps) {
+export function ChangePasswordCard() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const auth = getAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,23 +43,33 @@ export function ChangePasswordCard({ userId }: ChangePasswordCardProps) {
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    
-    const result = await changePassword(userId, values.newPassword);
-    
-    setIsLoading(false);
 
-    if (result.success) {
-      toast({
-        title: "Success",
-        description: result.message,
-      });
-      form.reset();
-    } else {
+    const user = auth.currentUser;
+    if (!user) {
         toast({
             variant: "destructive",
             title: "Error",
-            description: result.message,
-        })
+            description: "You must be logged in to change your password.",
+        });
+        setIsLoading(false);
+        return;
+    }
+    
+    try {
+        await updatePassword(user, values.newPassword);
+        toast({
+            title: "Success",
+            description: "Password updated successfully.",
+        });
+        form.reset();
+    } catch (error: any) {
+         toast({
+            variant: "destructive",
+            title: "Error",
+            description: error.message || "An unknown error occurred.",
+        });
+    } finally {
+        setIsLoading(false);
     }
   }
 

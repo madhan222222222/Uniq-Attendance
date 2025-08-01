@@ -81,7 +81,7 @@ export default function DashboardPage() {
         />
       </div>
       <div>
-        {user && <ChangePasswordCard userId={user.uid} />}
+        {user && <ChangePasswordCard />}
       </div>
     </div>
   );
