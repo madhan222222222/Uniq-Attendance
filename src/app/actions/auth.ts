@@ -90,7 +90,11 @@ export async function addStaff(payload: any) {
             id: user.uid, name, email, phone, location, role: 'staff',
         });
 
-        return { success: true, message: `Staff member ${name} added successfully. They can now login with email and temporary password: ${password}` };
+        // This is not secure and is a temporary solution. 
+        // In a real app, you would send a password reset or verification email.
+        await sendPasswordResetEmail(auth, email);
+
+        return { success: true, message: `Staff member ${name} added. A password reset email has been sent to ${email}.` };
     } catch (error: any) {
          console.error("Add staff failed:", error);
         if (error.code === 'auth/email-already-in-use') {
