@@ -1,6 +1,9 @@
+
 "use client"
 
 import * as React from "react"
+import jsPDF from "jspdf"
+import "jspdf-autotable"
 import { format } from "date-fns"
 import { Calendar as CalendarIcon, Loader2, Download } from "lucide-react"
 import { DateRange } from "react-day-picker"
@@ -20,6 +23,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge"
 import { getReportData, type ReportData } from "@/app/actions/attendance"
 import { useToast } from "@/hooks/use-toast"
+
+// Extend jsPDF with autoTable, since the types might not be available globally
+interface jsPDFWithAutoTable extends jsPDF {
+  autoTable: (options: any) => jsPDF;
+}
+
 
 export default function ReportingPage() {
   const [date, setDate] = React.useState<DateRange | undefined>({
@@ -66,30 +75,47 @@ export default function ReportingPage() {
       return;
     }
 
-    const headers = ["Student", "Batch", "Location", "Date", "Topic Covered", "Status"];
-    const csvContent = [
-      headers.join(","),
-      ...reportData.map(row => [
-        `"${row.student}"`,
-        `"${row.batch}"`,
-        `"${row.batchLocation}"`,
-        `"${row.date}"`,
-        `"${row.topic.replace(/"/g, '""')}"`, // Handle quotes in topic
-        `"${row.status}"`
-      ].join(","))
-    ].join("\n");
+    const doc = new jsPDF() as jsPDFWithAutoTable;
+    
+    // Add a title
+    doc.text("Attendance Report", 14, 16);
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22);
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement("a");
-    if (link.href) {
-        URL.revokeObjectURL(link.href);
-    }
-    const url = URL.createObjectURL(blob);
-    link.href = url;
-    link.setAttribute("download", "attendance_report.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const tableColumn = ["Student", "Batch", "Location", "Date", "Topic Covered", "Status"];
+    const tableRows: (string | null | undefined)[][] = [];
+
+    reportData.forEach(row => {
+      const rowData = [
+        row.student,
+        row.batch,
+        row.batchLocation,
+        row.date,
+        row.topic,
+        row.status
+      ];
+      tableRows.push(rowData);
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 30,
+      headStyles: { fillColor: [103, 58, 183] }, // Primary color
+      didDrawPage: (data) => {
+        // Footer
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(10);
+        doc.text(`Page ${data.pageNumber} of ${pageCount}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
+      }
+    });
+
+    doc.save("attendance_report.pdf");
+
+    toast({
+        title: "Download Started",
+        description: "Your PDF report is being generated.",
+    });
   };
 
   return (
@@ -153,7 +179,7 @@ export default function ReportingPage() {
             </Button>
           <Button onClick={handleDownload} disabled={reportData.length === 0} variant="outline">
             <Download className="mr-2 h-4 w-4" />
-            Download Report
+            Download PDF
           </Button>
         </CardContent>
       </Card>
