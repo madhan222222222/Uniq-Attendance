@@ -54,7 +54,7 @@ export function RegisterAdminForm() {
         title: "Admin Registered",
         description: `Admin ${values.name} has been created. Please login.`,
       });
-      router.push('/'); 
+      router.push('/login'); 
     } else {
       toast({
         variant: "destructive",
@@ -67,8 +67,8 @@ export function RegisterAdminForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="font-headline text-2xl">Register New Admin</CardTitle>
-        <CardDescription>Create a new account for an administrator.</CardDescription>
+        <CardTitle className="font-headline text-2xl">Create Super Admin</CardTitle>
+        <CardDescription>This will be the first administrator account.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>

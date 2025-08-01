@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -35,7 +36,7 @@ export default function DashboardLayout({
           setUser(JSON.parse(userData));
       } else {
           // If no user data, redirect to login
-          router.push('/');
+          router.push('/login');
       }
   }, [router]);
 
@@ -44,7 +45,7 @@ export default function DashboardLayout({
     try {
         await signOut(auth);
         sessionStorage.removeItem('user');
-        router.push('/');
+        router.push('/login');
     } catch (error) {
         console.error("Logout failed:", error);
     }
