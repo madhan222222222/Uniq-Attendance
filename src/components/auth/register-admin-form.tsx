@@ -69,7 +69,7 @@ export function RegisterAdminForm() {
     <Card>
       <CardHeader>
         <CardTitle className="font-headline text-2xl">Create Super Admin</CardTitle>
-        <CardDescription>This will be the first administrator account.</CardDescription>
+        <CardDescription>This will be the first administrator account for the application.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -123,7 +123,7 @@ export function RegisterAdminForm() {
                             <Input type="password" placeholder="Secret admin code" {...field} />
                         </FormControl>
                         <FormDescription>
-                            The default code is SECRET123.
+                            This is a secret code required to create the first admin. The default is SECRET123.
                         </FormDescription>
                         <FormMessage />
                     </FormItem>

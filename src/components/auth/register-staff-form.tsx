@@ -45,6 +45,7 @@ export function RegisterStaffForm() {
       name: "",
       email: "",
       password: "",
+      location: "",
     },
   });
 

@@ -63,8 +63,7 @@ export async function registerUser(payload: any) {
 
     try {
         if (role === 'admin') {
-            // Temporarily hardcode for stability.
-            const superAdminCode = "SECRET123"; 
+            const superAdminCode = await getSuperAdminCode();
             if (adminCode !== superAdminCode) {
                 return { success: false, message: "Invalid Admin Code. Cannot register an admin." };
             }
@@ -80,17 +79,17 @@ export async function registerUser(payload: any) {
             name,
             email,
             role,
-            location: location || "Default", 
+            location: role === 'admin' ? 'All' : location, 
         });
         
-        // Also add to 'staff' collection if the role is 'admin' or 'staff'
-        if (role === 'admin' || role === 'staff') {
+        // Also add to 'staff' collection if the role is 'staff'
+        if (role === 'staff') {
             await setDoc(doc(db, "staff", user.uid), {
                 id: user.uid,
                 name,
                 email,
                 role,
-                location: location || "Default",
+                location: location,
             });
         }
 

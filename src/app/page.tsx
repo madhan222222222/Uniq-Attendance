@@ -3,7 +3,7 @@
 
 import { RegisterAdminForm } from "@/components/auth/register-admin-form";
 import { Button } from "@/components/ui/button";
-import { GraduationCap } from "lucide-react";
+import { GraduationCap, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { hasAdminUser } from "@/app/actions/auth";
@@ -34,38 +34,22 @@ export default function Home() {
       </div>
       <div className="w-full max-w-sm pt-8">
         {loading ? (
-          <p>Loading...</p>
+          <div className="flex justify-center items-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <p className="ml-2">Loading...</p>
+          </div>
         ) : !adminExists ? (
            <RegisterAdminForm />
         ) : (
           <div className="text-center text-muted-foreground">
             <p>An admin account already exists.</p>
-            <Button variant="link" asChild className="p-0 h-auto">
+            <p>Please proceed to the login page.</p>
+            <Button asChild className="mt-4">
               <Link href="/login">
-                Proceed to Login
+                Go to Login
               </Link>
             </Button>
           </div>
-        )}
-        {!loading && adminExists && (
-           <div className="mt-4 text-center text-sm">
-             Already have an account?{' '}
-             <Button variant="link" asChild className="p-0 h-auto">
-               <Link href="/login">
-                 Login
-               </Link>
-             </Button>
-           </div>
-        )}
-         {!loading && !adminExists && (
-           <div className="mt-4 text-center text-sm">
-             Already have an account?{' '}
-             <Button variant="link" asChild className="p-0 h-auto">
-               <Link href="/login">
-                 Login
-               </Link>
-             </Button>
-           </div>
         )}
       </div>
     </main>
