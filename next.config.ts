@@ -12,4 +12,10 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname
+        hostname: 'placehold.co',
+      },
+    ],
+  },
+};
+
+export default nextConfig;
