@@ -36,6 +36,7 @@ const formSchema = z.object({
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   role: z.enum(["admin", "staff"], { required_error: "You need to select a role." }),
   location: z.string().optional(),
+  adminCode: z.string().optional(),
 }).refine(data => {
     if (data.role === 'staff' && !data.location) {
         return false;

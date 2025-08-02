@@ -99,12 +99,8 @@ export async function registerUser(payload: any) {
     console.log("New user registered:", payload);
     const { name, email, password, role, location, adminCode } = payload;
     
-    // Check for admin code ONLY if registering an admin
-    if (role === 'admin' && adminCode !== 'SECRET123') {
-        return { success: false, message: "Invalid admin code. Cannot register an admin." };
-    }
-
-
+    // Secret code is no longer needed for admin registration.
+    
     try {
         // Create user in Firebase Auth
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);

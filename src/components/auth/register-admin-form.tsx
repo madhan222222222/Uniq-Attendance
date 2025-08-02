@@ -26,7 +26,6 @@ const formSchema = z.object({
   name: z.string().min(1, { message: "Name is required." }),
   email: z.string().email({ message: "Please enter a valid email." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
-  adminCode: z.string().min(1, { message: "Admin code is required to register an admin." }),
 });
 
 export function RegisterAdminForm() {
@@ -40,7 +39,6 @@ export function RegisterAdminForm() {
       name: "",
       email: "",
       password: "",
-      adminCode: ""
     },
   });
 
@@ -112,22 +110,6 @@ export function RegisterAdminForm() {
                   <FormMessage />
                 </FormItem>
               )}
-            />
-            <FormField
-                control={form.control}
-                name="adminCode"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Admin Code</FormLabel>
-                        <FormControl>
-                            <Input type="password" placeholder="Secret admin code" {...field} />
-                        </FormControl>
-                        <FormDescription>
-                           A secret code is required to create the first admin. Hint: It's "SECRET123".
-                        </FormDescription>
-                        <FormMessage />
-                    </FormItem>
-                )}
             />
             <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
