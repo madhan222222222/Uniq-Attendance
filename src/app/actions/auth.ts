@@ -97,7 +97,13 @@ export async function loginUser(payload: any) {
 
 export async function registerUser(payload: any) {
     console.log("New user registered:", payload);
-    const { name, email, password, role, location } = payload;
+    const { name, email, password, role, location, adminCode } = payload;
+    
+    // Check for admin code if registering an admin
+    if (role === 'admin' && adminCode !== 'SECRET123') {
+        return { success: false, message: "Invalid admin code. Cannot register an admin." };
+    }
+
 
     try {
         // Create user in Firebase Auth
