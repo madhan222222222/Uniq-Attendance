@@ -21,7 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { resetPassword } from "@/app/actions/auth";
+import { resetPassword } from "@/app/actions/admin";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
