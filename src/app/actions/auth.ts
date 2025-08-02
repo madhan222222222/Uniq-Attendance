@@ -2,7 +2,7 @@
 "use server";
 
 import { auth, db } from "@/lib/firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
 export async function loginUser(payload: any) {
@@ -70,5 +70,18 @@ export async function registerUser(payload: any) {
             return { success: false, message: "An account with this email address already exists." };
         }
         return { success: false, message: error.message || "An unknown error occurred during registration." };
+    }
+}
+
+export async function resetPassword(email: string) {
+    try {
+        await sendPasswordResetEmail(auth, email);
+        return { success: true, message: "Password reset email sent. Please check your inbox." };
+    } catch (error: any) {
+        console.error("Password reset failed:", error);
+        if (error.code === 'auth/user-not-found') {
+            return { success: false, message: "No user found with this email." };
+        }
+        return { success: false, message: error.message || "An unknown error occurred." };
     }
 }

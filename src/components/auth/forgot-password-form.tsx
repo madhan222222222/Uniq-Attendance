@@ -21,12 +21,10 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { resetPassword } from "@/app/actions/admin";
+import { resetPassword } from "@/app/actions/auth";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
-  password: z.string().min(6, { message: "New password must be at least 6 characters." }),
-  adminCode: z.string().min(1, { message: "Secret code is required." }),
 });
 
 export function ForgotPasswordForm() {
@@ -36,19 +34,19 @@ export function ForgotPasswordForm() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { email: "", password: "", adminCode: "" },
+    defaultValues: { email: "" },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     
-    const result = await resetPassword(values);
+    const result = await resetPassword(values.email);
 
     setIsLoading(false);
 
     if (result.success) {
       toast({
-        title: "Password Reset Successful",
+        title: "Password Reset Email Sent",
         description: result.message,
       });
       router.push('/login');
@@ -66,7 +64,7 @@ export function ForgotPasswordForm() {
         <Card>
         <CardHeader>
             <CardTitle className="font-headline text-2xl">Forgot Password</CardTitle>
-            <CardDescription>Enter your email and the secret code to reset your password.</CardDescription>
+            <CardDescription>Enter your email to receive a password reset link.</CardDescription>
         </CardHeader>
         <CardContent>
             <Form {...form}>
@@ -84,38 +82,9 @@ export function ForgotPasswordForm() {
                     </FormItem>
                 )}
                 />
-                 <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>New Password</FormLabel>
-                      <FormControl>
-                        <Input type="password" placeholder="••••••••" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                control={form.control}
-                name="adminCode"
-                render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Secret Code</FormLabel>
-                        <FormControl>
-                            <Input type="password" placeholder="Secret admin code" {...field} />
-                        </FormControl>
-                         <FormDescription>
-                           A secret code is required to reset a password.
-                        </FormDescription>
-                        <FormMessage />
-                    </FormItem>
-                )}
-                />
                 <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Reset Password
+                Send Reset Link
                 </Button>
             </form>
             </Form>
