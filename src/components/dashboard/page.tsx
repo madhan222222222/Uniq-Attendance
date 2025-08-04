@@ -2,10 +2,20 @@
 "use client"
 import { StatsCard } from "@/components/dashboard/stats-card";
 import { WeeklyReportCard } from "@/components/dashboard/weekly-report-card";
-import { Users, BookUser, BookCopy, CalendarCheck, CalendarClock, UserPlus, Library } from "lucide-react";
+import { Users, BookUser, BookCopy, CalendarCheck, CalendarClock, UserPlus, Library, Download, Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, query, where, Timestamp } from "firebase/firestore";
+import { Button } from "../ui/button";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import { useToast } from "@/hooks/use-toast";
+import { getWeeklyReport, ReportData } from "@/app/actions/attendance";
+
+// Extend jsPDF with autoTable, since the types might not be available globally
+interface jsPDFWithAutoTable extends jsPDF {
+  autoTable: (options: any) => jsPDF;
+}
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -20,6 +30,8 @@ export default function DashboardPage() {
     newBatches: 0,
   });
   const [isLoading, setIsLoading] = useState(true);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     async function fetchStats() {
@@ -113,6 +125,85 @@ export default function DashboardPage() {
     fetchStats();
   }, []);
 
+  const handleDownloadWeeklyReport = async () => {
+    setIsDownloading(true);
+
+    const result = await getWeeklyReport();
+
+    if (!result.success) {
+      toast({
+        variant: "destructive",
+        title: "Download Failed",
+        description: result.error,
+      });
+      setIsDownloading(false);
+      return;
+    }
+
+    if (result.data.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "No Data",
+        description: "There is no attendance data for the last week to report.",
+      });
+      setIsDownloading(false);
+      return;
+    }
+
+    const doc = new jsPDF() as jsPDFWithAutoTable;
+    
+    doc.text("Weekly Report", 14, 16);
+    doc.setFontSize(10);
+    doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 22);
+
+    // Add summary section
+    doc.setFontSize(12);
+    doc.text("Last 7 Days Summary:", 14, 32);
+    doc.setFontSize(10);
+    const summaryText = [
+        `- Weekly Attendance Rate: ${weeklyStats.attendance}`,
+        `- New Students Enrolled: ${weeklyStats.newStudents}`,
+        `- New Batches Created: ${weeklyStats.newBatches}`,
+    ];
+    doc.text(summaryText, 14, 38);
+
+    const tableColumn = ["Student", "Batch", "Location", "Date", "Topic Covered", "Status"];
+    const tableRows: (string | null | undefined)[][] = [];
+
+    result.data.forEach(row => {
+      const rowData = [
+        row.student,
+        row.batch,
+        row.batchLocation,
+        row.date,
+        row.topic,
+        row.status
+      ];
+      tableRows.push(rowData);
+    });
+
+    doc.autoTable({
+      head: [tableColumn],
+      body: tableRows,
+      startY: 55, // Start table after summary
+      headStyles: { fillColor: [103, 58, 183] }, // Primary color
+      didDrawPage: (data) => {
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(10);
+        doc.text(`Page ${data.pageNumber} of ${pageCount}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
+      }
+    });
+
+    doc.save("weekly_attendance_report.pdf");
+
+    toast({
+        title: "Download Started",
+        description: "Your weekly report PDF is being generated.",
+    });
+
+    setIsDownloading(false);
+  }
+
   const today = new Date().toLocaleDateString(undefined, {
     weekday: 'long',
     year: 'numeric',
@@ -154,8 +245,20 @@ export default function DashboardPage() {
       </div>
       
       <div className="mt-4">
-         <h3 className="text-xl md:text-2xl font-bold tracking-tight font-headline">Weekly Report</h3>
-         <p className="text-muted-foreground">Summary of the last 7 days.</p>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+                <h3 className="text-xl md:text-2xl font-bold tracking-tight font-headline">Weekly Report</h3>
+                <p className="text-muted-foreground">Summary of the last 7 days.</p>
+            </div>
+            <Button onClick={handleDownloadWeeklyReport} disabled={isDownloading || isLoading}>
+                {isDownloading ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                    <Download className="mr-2 h-4 w-4" />
+                )}
+                {isDownloading ? 'Generating...' : 'Download Report'}
+            </Button>
+        </div>
       </div>
       <div className="grid gap-4 sm:grid-cols-1 lg:grid-cols-3">
         <WeeklyReportCard

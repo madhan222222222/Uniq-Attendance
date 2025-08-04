@@ -92,3 +92,22 @@ export async function getReportData(filters: { location?: string, from?: Date, t
     return { success: false, error: "Failed to fetch report data." };
   }
 }
+
+export async function getWeeklyReport() {
+    try {
+        const lastWeek = new Date();
+        lastWeek.setDate(lastWeek.getDate() - 7);
+        lastWeek.setHours(0, 0, 0, 0);
+
+        const result = await getReportData({ from: lastWeek, to: new Date() });
+
+        if (result.success) {
+            return { success: true, data: result.data };
+        } else {
+            return { success: false, error: "Failed to fetch weekly attendance data." };
+        }
+    } catch (error) {
+        console.error("Error generating weekly report: ", error);
+        return { success: false, error: "An unexpected error occurred." };
+    }
+}
