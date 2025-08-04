@@ -3,7 +3,7 @@
 
 import { auth, db } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc, getDoc, collection, addDoc, updateDoc, arrayUnion } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, addDoc, updateDoc, arrayUnion, Timestamp } from "firebase/firestore";
 
 export async function loginUser(payload: any) {
     console.log("Login attempt:", payload);
@@ -46,7 +46,8 @@ export async function registerUser(payload: any) {
             name,
             email,
             role,
-            location: role === 'admin' ? 'All' : location, 
+            location: role === 'admin' ? 'All' : location,
+            createdAt: Timestamp.now(), 
         });
         
         // Also add to 'staff' collection if the role is 'staff'
@@ -58,6 +59,7 @@ export async function registerUser(payload: any) {
                 role,
                 location: location,
                 phone: phone || '',
+                createdAt: Timestamp.now(),
             });
         }
 
@@ -81,7 +83,8 @@ export async function addStudent(payload: { name: string; email: string; phone: 
             email: payload.email,
             phone: payload.phone,
             location: payload.location,
-            batchIds: [payload.batchId] // Start with the selected batch
+            batchIds: [payload.batchId], // Start with the selected batch
+            createdAt: Timestamp.now(),
         });
         const studentId = studentDocRef.id;
 
@@ -103,7 +106,8 @@ export async function addBatch(payload: { name: string; location: string; timing
     try {
         await addDoc(collection(db, "batches"), {
             ...payload,
-            studentIds: [] // Initialize with empty array
+            studentIds: [], // Initialize with empty array
+            createdAt: Timestamp.now(),
         });
         return { success: true, message: `Batch ${payload.name} added successfully.` };
     } catch (error: any) {
