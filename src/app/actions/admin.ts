@@ -50,11 +50,13 @@ export async function resetPasswordWithAdminCode(payload: any) {
     } catch (error: any) {
         console.error("Password reset failed:", error);
 
-        if (error.code === 'auth/user-not-found') {
+        // More robust error handling
+        if (error && error.code === 'auth/user-not-found') {
             return { success: false, message: "No user found with this email address." };
         }
         
-        // Return a generic error message for other failures
-        return { success: false, message: error.message || "An unknown error occurred during password reset." };
+        // Return a generic error message for other failures, checking if error and error.message exist
+        const message = error?.message || "An unknown error occurred during password reset.";
+        return { success: false, message };
     }
 }
