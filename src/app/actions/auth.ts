@@ -111,16 +111,3 @@ export async function addBatch(payload: { name: string; location: string; timing
         return { success: false, message: error.message || "An unknown error occurred." };
     }
 }
-
-export async function resetPassword(email: string) {
-    try {
-        await sendPasswordResetEmail(auth, email);
-        return { success: true, message: "Password reset email sent successfully. Please check your inbox." };
-    } catch (error: any) {
-        console.error("Error sending password reset email:", error);
-        if (error.code === 'auth/user-not-found') {
-            return { success: false, message: "No user found with this email." };
-        }
-        return { success: false, message: error.message || "An unknown error occurred." };
-    }
-}

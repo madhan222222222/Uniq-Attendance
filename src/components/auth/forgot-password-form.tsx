@@ -20,10 +20,12 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { resetPassword } from "@/app/actions/auth";
+import { resetPasswordWithAdminCode } from "@/app/actions/admin";
 
 const formSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email." }),
+  newPassword: z.string().min(6, { message: "Password must be at least 6 characters." }),
+  code: z.string().min(1, { message: "Secret code is required." }),
 });
 
 export function ForgotPasswordForm() {
@@ -33,19 +35,19 @@ export function ForgotPasswordForm() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { email: "" },
+    defaultValues: { email: "", newPassword: "", code: "" },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
     
-    const result = await resetPassword(values.email);
+    const result = await resetPasswordWithAdminCode(values);
 
     setIsLoading(false);
 
     if (result.success) {
       toast({
-        title: "Check your email",
+        title: "Password Reset Successful",
         description: result.message,
       });
       router.push('/login');
@@ -62,28 +64,54 @@ export function ForgotPasswordForm() {
     <>
         <Card>
         <CardHeader>
-            <CardTitle className="font-headline text-2xl">Forgot Password</CardTitle>
-            <CardDescription>Enter your email address and we'll send you a link to reset your password.</CardDescription>
+            <CardTitle className="font-headline text-2xl">Reset Password</CardTitle>
+            <CardDescription>Enter the user's email, a new password, and the secret code.</CardDescription>
         </CardHeader>
         <CardContent>
             <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                      <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                          <Input placeholder="user@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                      </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="newPassword"
+                  render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                        <Input placeholder="user@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
+                      <FormLabel>New Password</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="••••••••" {...field} />
+                      </FormControl>
+                      <FormMessage />
                     </FormItem>
-                )}
+                  )}
+                />
+                 <FormField
+                  control={form.control}
+                  name="code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Secret Code</FormLabel>
+                      <FormControl>
+                        <Input type="password" placeholder="Enter secret code" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Send Reset Link
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Reset Password
                 </Button>
             </form>
             </Form>
