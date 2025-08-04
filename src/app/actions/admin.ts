@@ -6,27 +6,31 @@ import * as admin from 'firebase-admin';
 // This is the secret code required to reset a password.
 const RESET_PASSWORD_CODE = "234567";
 
+// Initialize Firebase Admin SDK only if it hasn't been already.
+// This approach ensures it's a singleton and avoids re-initialization errors.
+if (!admin.apps.length) {
+    const serviceAccount = {
+        projectId: process.env.FB_PROJECT_ID,
+        privateKey: process.env.FB_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        clientEmail: process.env.FB_CLIENT_EMAIL,
+    };
+
+    // This check is critical and must run before attempting to initialize.
+    if (serviceAccount.projectId && serviceAccount.privateKey && serviceAccount.clientEmail) {
+        admin.initializeApp({
+            credential: admin.credential.cert(serviceAccount),
+        });
+    }
+}
+
+
 export async function resetPasswordWithAdminCode(payload: any) {
+    // Check if the SDK is configured before proceeding.
+    if (!admin.apps.length) {
+         return { success: false, message: "Firebase Admin SDK is not configured. Cannot reset password. Please check server environment variables." };
+    }
+    
     try {
-        // Initialize Firebase Admin SDK if not already initialized
-        if (!admin.apps.length) {
-            const serviceAccount = {
-                projectId: process.env.FB_PROJECT_ID,
-                privateKey: process.env.FB_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-                clientEmail: process.env.FB_CLIENT_EMAIL,
-            };
-
-            // This check is critical and must run before attempting to initialize.
-            if (!serviceAccount.projectId || !serviceAccount.privateKey || !serviceAccount.clientEmail) {
-                // We throw a clear error that will be caught by our handler.
-                throw new Error("Firebase Admin SDK is not configured. Cannot reset password.");
-            }
-
-            admin.initializeApp({
-                credential: admin.credential.cert(serviceAccount),
-            });
-        }
-
         const { email, newPassword, code } = payload;
 
         if (code !== RESET_PASSWORD_CODE) {
@@ -50,7 +54,7 @@ export async function resetPasswordWithAdminCode(payload: any) {
             return { success: false, message: "No user found with this email address." };
         }
         
-        // Handle custom or other errors
+        // Handle other errors
         const errorMessage = error.message || "An unknown error occurred during password reset.";
         return { success: false, message: errorMessage };
     }
