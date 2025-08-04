@@ -5,7 +5,6 @@ import { Users, BookUser, BookCopy, CalendarCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
-import { ChangePasswordCard } from "./change-password-card";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState({
@@ -72,9 +71,6 @@ export default function DashboardPage() {
           icon={CalendarCheck}
           description="Overall attendance rate for today"
         />
-      </div>
-      <div>
-        <ChangePasswordCard />
       </div>
     </div>
   );
