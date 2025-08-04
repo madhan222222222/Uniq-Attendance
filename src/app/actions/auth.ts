@@ -3,7 +3,7 @@
 
 import { auth, db } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc, collection, addDoc, updateDoc, arrayUnion } from "firebase/firestore";
 
 export async function loginUser(payload: any) {
     console.log("Login attempt:", payload);
@@ -33,7 +33,7 @@ export async function loginUser(payload: any) {
 
 export async function registerUser(payload: any) {
     console.log("New user registered:", payload);
-    const { name, email, password, role, location } = payload;
+    const { name, email, password, role, location, phone } = payload;
     
     try {
         // Create user in Firebase Auth
@@ -57,7 +57,7 @@ export async function registerUser(payload: any) {
                 email,
                 role,
                 location: location,
-                phone: payload.phone || '',
+                phone: phone || '',
             });
         }
 
@@ -82,6 +82,46 @@ export async function resetPassword(email: string) {
         if (error.code === 'auth/user-not-found') {
             return { success: false, message: "No user found with this email." };
         }
+        return { success: false, message: error.message || "An unknown error occurred." };
+    }
+}
+
+
+export async function addStudent(payload: { name: string; email: string; phone: string; location: string; batchId: string; }) {
+    try {
+        // 1. Add student to "students" collection
+        const studentDocRef = await addDoc(collection(db, "students"), {
+            name: payload.name,
+            email: payload.email,
+            phone: payload.phone,
+            location: payload.location,
+            batchIds: [payload.batchId] // Start with the selected batch
+        });
+        const studentId = studentDocRef.id;
+
+        // 2. Update the batch's studentIds array
+        const batchDocRef = doc(db, "batches", payload.batchId);
+        await updateDoc(batchDocRef, {
+            studentIds: arrayUnion(studentId)
+        });
+
+        return { success: true, message: `Student ${payload.name} added successfully.` };
+
+    } catch (error: any) {
+        console.error("Error adding student: ", error);
+        return { success: false, message: error.message || "An unknown error occurred." };
+    }
+}
+
+export async function addBatch(payload: { name: string; location: string; timings: string }) {
+    try {
+        await addDoc(collection(db, "batches"), {
+            ...payload,
+            studentIds: [] // Initialize with empty array
+        });
+        return { success: true, message: `Batch ${payload.name} added successfully.` };
+    } catch (error: any) {
+        console.error("Error adding batch: ", error);
         return { success: false, message: error.message || "An unknown error occurred." };
     }
 }
