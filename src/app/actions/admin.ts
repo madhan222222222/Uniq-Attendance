@@ -12,10 +12,11 @@ async function initializeAdminApp() {
     }
 
     const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    
+    // The check for the service account is now inside the function.
+    // This ensures it only runs when the function is called, not during build time.
     if (!serviceAccount) {
-        // This error will now only be thrown if the function is actually called
-        // without the environment variable being set, not during build time.
-        throw new Error("Firebase service account key is not set in environment variables.");
+        throw new Error("Firebase service account key is not set in environment variables. This is required for admin operations.");
     }
 
     return admin.initializeApp({
