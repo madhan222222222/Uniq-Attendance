@@ -3,19 +3,26 @@
 
 import * as admin from 'firebase-admin';
 
-const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
-
-if (!admin.apps.length) {
-    if (!serviceAccount) {
-        throw new Error("Firebase service account key is not set in environment variables.");
+// This function will initialize the admin app only when called.
+function initializeAdminApp() {
+    const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    // Check if the app is already initialized to avoid errors.
+    if (!admin.apps.length) {
+        if (!serviceAccount) {
+            // This error will only be thrown if the function is called without the key being set,
+            // not during the build.
+            throw new Error("Firebase service account key is not set in environment variables.");
+        }
+        admin.initializeApp({
+            credential: admin.credential.cert(JSON.parse(serviceAccount)),
+        });
     }
-    admin.initializeApp({
-        credential: admin.credential.cert(JSON.parse(serviceAccount)),
-    });
 }
 
-
 export async function resetPasswordWithAdminCode(payload: any) {
+    // Initialize the app right when it's needed.
+    initializeAdminApp();
+    
     const { email, newPassword, adminCode } = payload;
     const SECRET_CODE = "234567"; // Your secret code
 
