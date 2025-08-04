@@ -1,7 +1,7 @@
 
 "use server";
 
-import * as admin from 'firebase-admin';
+import admin from 'firebase-admin';
 
 // This is the secret code required to reset a password.
 const RESET_PASSWORD_CODE = "234567";
@@ -17,9 +17,13 @@ if (!admin.apps.length) {
 
     // This check is critical and must run before attempting to initialize.
     if (serviceAccount.projectId && serviceAccount.privateKey && serviceAccount.clientEmail) {
-        admin.initializeApp({
-            credential: admin.credential.cert(serviceAccount),
-        });
+        try {
+            admin.initializeApp({
+                credential: admin.credential.cert(serviceAccount),
+            });
+        } catch (error) {
+            console.error("Firebase Admin SDK initialization error:", error);
+        }
     }
 }
 
@@ -59,3 +63,4 @@ export async function resetPasswordWithAdminCode(payload: any) {
         return { success: false, message: errorMessage };
     }
 }
+
