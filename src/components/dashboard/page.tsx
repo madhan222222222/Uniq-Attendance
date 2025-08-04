@@ -1,3 +1,4 @@
+
 "use client"
 import { StatsCard } from "@/components/dashboard/stats-card";
 import { WeeklyReportCard } from "@/components/dashboard/weekly-report-card";
@@ -11,7 +12,7 @@ export default function DashboardPage() {
     students: 0,
     staff: 0,
     batches: 0,
-    attendance: "0"
+    attendance: "0%"
   });
   const [weeklyStats, setWeeklyStats] = useState({
     attendance: "0%",
@@ -89,7 +90,6 @@ export default function DashboardPage() {
             : 0;
 
         // Weekly New Students & Batches (requires creation timestamp)
-        // Assuming 'createdAt' field exists. If not, this part needs adjustment.
         const newStudentsQuery = query(collection(dbInstance, "students"), where("createdAt", ">=", Timestamp.fromDate(lastWeek)));
         const newBatchesQuery = query(collection(dbInstance, "batches"), where("createdAt", ">=", Timestamp.fromDate(lastWeek)));
         
