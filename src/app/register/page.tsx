@@ -45,6 +45,14 @@ const formSchema = z.object({
 }, {
     message: "Location is required for staff.",
     path: ["location"],
+}).refine(data => {
+    if (data.role === 'admin' && data.adminCode !== 'Admin123') {
+        return false;
+    }
+    return true;
+}, {
+    message: "Invalid secret code for admin registration.",
+    path: ["adminCode"],
 });
 
 export default function RegisterPage() {
@@ -89,7 +97,7 @@ export default function RegisterPage() {
       <div className="flex flex-col items-center justify-center space-y-4">
         <div className="flex items-center gap-4 text-primary">
           <GraduationCap className="h-12 w-12" />
-          <h1 className="font-headline text-5xl font-bold">Uniq attendance</h1>
+          <h1 className="font-headline text-5xl font-bold">Uniq Attendance</h1>
         </div>
          <p className="text-lg text-muted-foreground">
           Create a new account.
@@ -184,6 +192,21 @@ export default function RegisterPage() {
                             {locations.map(loc => <SelectItem key={loc} value={loc}>{loc}</SelectItem>)}
                           </SelectContent>
                         </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
+                {role === 'admin' && (
+                  <FormField
+                    control={form.control}
+                    name="adminCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Secret Code</FormLabel>
+                        <FormControl>
+                          <Input type="password" placeholder="Enter admin secret code" {...field} />
+                        </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
