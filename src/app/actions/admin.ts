@@ -11,16 +11,20 @@ async function initializeAdminApp() {
         return admin.app();
     }
 
-    const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    const serviceAccount = {
+        projectId: process.env.FB_PROJECT_ID,
+        privateKey: process.env.FB_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        clientEmail: process.env.FB_CLIENT_EMAIL,
+    };
     
     // The check for the service account is now inside the function.
     // This ensures it only runs when the function is called, not during build time.
-    if (!serviceAccount) {
-        throw new Error("Firebase service account key is not set in environment variables. This is required for admin operations.");
+    if (!serviceAccount.projectId || !serviceAccount.privateKey || !serviceAccount.clientEmail) {
+        throw new Error("Firebase service account credentials are not set in environment variables. This is required for admin operations.");
     }
 
     return admin.initializeApp({
-        credential: admin.credential.cert(JSON.parse(serviceAccount)),
+        credential: admin.credential.cert(serviceAccount),
     });
 }
 
