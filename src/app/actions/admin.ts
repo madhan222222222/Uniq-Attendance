@@ -4,7 +4,7 @@
 import admin from 'firebase-admin';
 
 // This is the secret code required to reset a password.
-const RESET_PASSWORD_CODE = "234567";
+const RESET_PASSWORD_CODE = "Admin123";
 
 // Initialize Firebase Admin SDK only if it hasn't been already.
 // This approach ensures it's a singleton and avoids re-initialization errors.
@@ -63,4 +63,3 @@ export async function resetPasswordWithAdminCode(payload: any) {
         return { success: false, message: errorMessage };
     }
 }
-
