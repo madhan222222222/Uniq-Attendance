@@ -66,6 +66,8 @@ export default function RegisterPage() {
       name: "",
       email: "",
       password: "",
+      location: "",
+      adminCode: "",
     },
   });
 
