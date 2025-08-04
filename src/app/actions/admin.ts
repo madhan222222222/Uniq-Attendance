@@ -6,7 +6,9 @@ import * as admin from 'firebase-admin';
 // This is the secret code required to reset a password.
 const RESET_PASSWORD_CODE = "234567";
 
-async function initializeAdminApp() {
+// Helper function to initialize the Firebase Admin App if it hasn't been already.
+// This prevents re-initialization errors.
+function initializeAdminApp() {
     if (admin.apps.length > 0) {
         return admin.app();
     }
@@ -16,11 +18,11 @@ async function initializeAdminApp() {
         privateKey: process.env.FB_PRIVATE_KEY?.replace(/\\n/g, '\n'),
         clientEmail: process.env.FB_CLIENT_EMAIL,
     };
-    
-    // The check for the service account is now inside the function.
-    // This ensures it only runs when the function is called, not during build time.
+
+    // This check is critical and must run before attempting to initialize.
     if (!serviceAccount.projectId || !serviceAccount.privateKey || !serviceAccount.clientEmail) {
-        throw new Error("Firebase service account credentials are not set in environment variables. This is required for admin operations.");
+        // We throw a clear error that will be caught by our handler.
+        throw new Error("FIREBASE_ADMIN_SDK_CONFIG_MISSING");
     }
 
     return admin.initializeApp({
@@ -30,7 +32,7 @@ async function initializeAdminApp() {
 
 export async function resetPasswordWithAdminCode(payload: any) {
     try {
-        await initializeAdminApp();
+        initializeAdminApp(); // Ensure the app is initialized.
 
         const { email, newPassword, code } = payload;
 
@@ -50,13 +52,14 @@ export async function resetPasswordWithAdminCode(payload: any) {
     } catch (error: any) {
         console.error("Password reset failed:", error);
 
-        // More robust error handling
-        if (error && error.code === 'auth/user-not-found') {
+        // Simplified and more robust error handling
+        if (error.code === 'auth/user-not-found') {
             return { success: false, message: "No user found with this email address." };
         }
+        if (error.message === 'FIREBASE_ADMIN_SDK_CONFIG_MISSING') {
+            return { success: false, message: "Firebase Admin SDK is not configured. Cannot reset password." };
+        }
         
-        // Return a generic error message for other failures, checking if error and error.message exist
-        const message = error?.message || "An unknown error occurred during password reset.";
-        return { success: false, message };
+        return { success: false, message: "An unknown error occurred during password reset." };
     }
 }
