@@ -152,7 +152,8 @@ export default function DashboardPage() {
           description="Overall attendance rate for today"
         />
       </div>
-      <div>
+      
+      <div className="mt-4">
          <h3 className="text-xl md:text-2xl font-bold tracking-tight font-headline">Weekly Report</h3>
          <p className="text-muted-foreground">Summary of the last 7 days.</p>
       </div>
