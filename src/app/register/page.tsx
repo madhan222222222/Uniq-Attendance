@@ -95,7 +95,7 @@ export default function RegisterPage() {
           Create a new account.
         </p>
          <p className="text-sm text-muted-foreground">
-            powered by python team
+            Powered By Python Team
         </p>
       </div>
        <div className="w-full max-w-sm pt-8">
