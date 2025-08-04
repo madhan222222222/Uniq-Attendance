@@ -12,10 +12,13 @@ export default function Home() {
       <div className="flex flex-col items-center justify-center space-y-4">
         <div className="flex items-center gap-4 text-primary">
           <GraduationCap className="h-12 w-12" />
-          <h1 className="font-headline text-5xl font-bold">Attendance AI</h1>
+          <h1 className="font-headline text-5xl font-bold">Uniq attendance</h1>
         </div>
         <p className="text-lg text-muted-foreground">
           Smart attendance tracking for modern institutions.
+        </p>
+        <p className="text-sm text-muted-foreground">
+            powered by python team
         </p>
       </div>
       <div className="w-full max-w-sm pt-8 text-center">

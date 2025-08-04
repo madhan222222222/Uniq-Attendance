@@ -69,7 +69,7 @@ export default function DashboardLayout({
              </div>
             <div className="flex flex-col group-data-[collapsible=icon]:hidden">
               <span className="font-headline text-xl font-semibold text-sidebar-foreground">
-                Attendance AI
+                Uniq attendance
               </span>
             </div>
           </div>
