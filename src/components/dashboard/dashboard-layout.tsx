@@ -15,10 +15,18 @@ import {
 import { SidebarNav } from "@/components/dashboard/sidebar-nav";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { GraduationCap, LogOut } from "lucide-react";
+import { GraduationCap, LogOut, User as UserIcon, Mail, Shield } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export default function DashboardLayout({
   children,
@@ -28,7 +36,7 @@ export default function DashboardLayout({
   const searchParams = useSearchParams();
   const router = useRouter();
   const role = searchParams.get("role") || "staff"; // Default to staff
-  const [user, setUser] = useState<{name: string, email: string} | null>(null);
+  const [user, setUser] = useState<{name: string, email: string, role: string} | null>(null);
 
   useEffect(() => {
       const userData = sessionStorage.getItem('user');
@@ -78,26 +86,45 @@ export default function DashboardLayout({
           <SidebarNav role={role as "admin" | "staff"} />
         </SidebarContent>
         <SidebarFooter className="p-4 mt-auto">
-          <div className="flex items-center gap-3">
-            <Avatar>
-              <AvatarImage src="https://placehold.co/40x40.png" alt="User avatar" data-ai-hint="profile picture" />
-              <AvatarFallback>{user.name ? user.name.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-              <span className="font-semibold text-sm text-sidebar-foreground capitalize">{user.name}</span>
-              <span className="text-xs text-muted-foreground">
-                {user.email}
-              </span>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="ml-auto group-data-[collapsible=icon]:hidden text-sidebar-foreground hover:text-white"
-              onClick={handleLogout}
-            >
-              <LogOut className="h-5 w-5" />
-            </Button>
-          </div>
+           <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+                <div className="flex items-center gap-3 cursor-pointer">
+                    <Avatar>
+                    <AvatarImage src="https://placehold.co/40x40.png" alt="User avatar" data-ai-hint="profile picture" />
+                    <AvatarFallback>{user.name ? user.name.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col group-data-[collapsible=icon]:hidden">
+                    <span className="font-semibold text-sm text-sidebar-foreground capitalize">{user.name}</span>
+                    <span className="text-xs text-muted-foreground">
+                        {user.email}
+                    </span>
+                    </div>
+                </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-64 mb-2 ml-4" side="top" align="start">
+                <DropdownMenuLabel>
+                    <div className="font-bold">Uniq employee</div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem className="flex items-center gap-2">
+                    <UserIcon className="h-4 w-4" />
+                    <span className="font-medium capitalize">{user.name}</span>
+                </DropdownMenuItem>
+                 <DropdownMenuItem className="flex items-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    <span className="font-medium">{user.email}</span>
+                </DropdownMenuItem>
+                 <DropdownMenuItem className="flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
+                    <span className="font-medium capitalize">{user.role}</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onSelect={handleLogout} className="cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                </DropdownMenuItem>
+            </DropdownMenuContent>
+            </DropdownMenu>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
