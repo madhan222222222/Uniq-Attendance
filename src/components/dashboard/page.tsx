@@ -1,4 +1,3 @@
-
 "use client"
 import { StatsCard } from "@/components/dashboard/stats-card";
 import { WeeklyReportCard } from "@/components/dashboard/weekly-report-card";
