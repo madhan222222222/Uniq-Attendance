@@ -128,7 +128,7 @@ export default function DashboardLayout({
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="flex h-14 items-center gap-4 border-b bg-card px-6">
+        <header className="flex h-14 items-center gap-4 border-b bg-card px-4 sm:px-6">
           <SidebarTrigger className="md:hidden" />
           <div className="flex-1">
             <h1 className="font-headline text-lg font-semibold md:text-xl capitalize">
@@ -136,7 +136,7 @@ export default function DashboardLayout({
             </h1>
           </div>
         </header>
-        <main className="flex-1 overflow-auto p-4 md:p-8">{children}</main>
+        <main className="flex-1 overflow-auto p-4 md:p-6">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );

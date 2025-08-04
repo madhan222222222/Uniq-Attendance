@@ -95,20 +95,20 @@ export default function RegisterPage() {
   }
 
   return (
-     <main className="flex min-h-screen flex-col items-center justify-center bg-background p-8">
-      <div className="flex flex-col items-center justify-center space-y-4">
-        <div className="flex items-center gap-4 text-primary">
-          <GraduationCap className="h-12 w-12" />
-          <h1 className="font-headline text-5xl font-bold">Uniq Attendance</h1>
+     <main className="flex min-h-screen flex-col items-center justify-center bg-background p-4 sm:p-8">
+      <div className="flex flex-col items-center justify-center space-y-4 text-center">
+        <div className="flex items-center gap-2 sm:gap-4 text-primary">
+          <GraduationCap className="h-10 w-10 sm:h-12 sm:w-12" />
+          <h1 className="font-headline text-4xl sm:text-5xl font-bold">Uniq Attendance</h1>
         </div>
-         <p className="text-lg text-muted-foreground">
+         <p className="text-base sm:text-lg text-muted-foreground">
           Create a new account.
         </p>
-         <p className="text-sm text-muted-foreground">
+         <p className="text-xs sm:text-sm text-muted-foreground">
             Powered By Python Team
         </p>
       </div>
-       <div className="w-full max-w-sm pt-8">
+       <div className="w-full max-w-xs sm:max-w-sm pt-8">
         <Card>
           <CardHeader>
             <CardTitle className="font-headline text-2xl">Register</CardTitle>
@@ -116,7 +116,7 @@ export default function RegisterPage() {
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                  <FormField
                   control={form.control}
                   name="name"
