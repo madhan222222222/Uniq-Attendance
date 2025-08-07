@@ -20,7 +20,14 @@ export async function loginUser(payload: any) {
              return { success: false, message: `You are not registered as a ${role}.` };
         }
 
-        return { success: true, message: "Login successful.", user: { uid: user.uid, email: user.email, name: userDoc.data().name, ...userDoc.data() } };
+        const userData = userDoc.data();
+        // Convert timestamp to a serializable format (ISO string)
+        const serializableUser = {
+            ...userData,
+            createdAt: userData.createdAt.toDate().toISOString(),
+        };
+
+        return { success: true, message: "Login successful.", user: serializableUser };
     } catch (error: any) {
         console.error("Login failed:", error);
         if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
