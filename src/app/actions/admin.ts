@@ -7,26 +7,26 @@ import admin from 'firebase-admin';
 const RESET_PASSWORD_CODE = "234567";
 
 // Prepare the service account credentials from environment variables.
-const serviceAccount = {
-    projectId: process.env.FB_PROJECT_ID,
-    privateKey: process.env.FB_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    clientEmail: process.env.FB_CLIENT_EMAIL,
-};
-
-// Initialize Firebase Admin SDK only if it hasn't been already.
-// This approach ensures it's a singleton and avoids re-initialization errors.
+// Ensure this code runs only once.
 if (!admin.apps.length) {
+    const serviceAccount = {
+        projectId: process.env.FB_PROJECT_ID,
+        privateKey: process.env.FB_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        clientEmail: process.env.FB_CLIENT_EMAIL,
+    };
+
     // Check for the existence of credentials before initializing.
     if (serviceAccount.projectId && serviceAccount.privateKey && serviceAccount.clientEmail) {
         try {
             admin.initializeApp({
                 credential: admin.credential.cert(serviceAccount),
             });
+            console.log("Firebase Admin SDK initialized successfully.");
         } catch (error) {
             console.error("Firebase Admin SDK initialization error:", error);
         }
     } else {
-        console.warn("Firebase Admin credentials are not set. Some features will be disabled.");
+        console.warn("Firebase Admin credentials are not set in environment variables. Admin features will be disabled.");
     }
 }
 
@@ -34,7 +34,7 @@ if (!admin.apps.length) {
 export async function resetPasswordWithAdminCode(payload: any) {
     // Check if the SDK is configured before proceeding.
     if (!admin.apps.length) {
-         return { success: false, message: "Firebase Admin SDK is not configured. Cannot reset password. Please check server environment variables." };
+         return { success: false, message: "Firebase Admin SDK is not configured. Cannot reset password. Please check server environment variables on your hosting provider." };
     }
     
     try {
