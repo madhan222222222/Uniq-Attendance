@@ -1,13 +1,13 @@
 
 "use client";
 
+import { Suspense } from "react";
 import { RegisterAdminForm } from "@/components/auth/register-admin-form";
 import { useSearchParams } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 
-
-export default function RegisterAdminPage() {
+function RegisterAdminContent() {
     const searchParams = useSearchParams();
     const role = searchParams.get("role");
 
@@ -29,5 +29,17 @@ export default function RegisterAdminPage() {
                 <RegisterAdminForm />
             </div>
         </div>
+    );
+}
+
+export default function RegisterAdminPage() {
+    return (
+        <Suspense fallback={
+            <div className="flex justify-center items-center h-40">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        }>
+            <RegisterAdminContent />
+        </Suspense>
     );
 }

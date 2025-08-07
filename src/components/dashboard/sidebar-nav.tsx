@@ -1,7 +1,7 @@
 
 "use client";
 
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -16,13 +16,15 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
-import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
+import { Skeleton } from "../ui/skeleton";
+
 
 type SidebarNavProps = {
   role: "admin" | "staff";
 };
 
-export function SidebarNav({ role }: SidebarNavProps) {
+function NavItems({ role }: SidebarNavProps) {
   const pathname = usePathname();
   const searchParamsHook = useSearchParams();
   const roleQuery = searchParamsHook.get('role');
@@ -48,7 +50,7 @@ export function SidebarNav({ role }: SidebarNavProps) {
   const navItems = role === "admin" ? adminNavItems : staffNavItems;
 
   return (
-    <SidebarMenu>
+     <SidebarMenu>
       {navItems.map((item) => (
         <SidebarMenuItem key={item.href}>
           <SidebarMenuButton
@@ -64,5 +66,28 @@ export function SidebarNav({ role }: SidebarNavProps) {
         </SidebarMenuItem>
       ))}
     </SidebarMenu>
+  )
+}
+
+function SidebarNavMenuSkeleton() {
+  return (
+    <SidebarMenu>
+      {[...Array(5)].map((_, i) => (
+        <SidebarMenuItem key={i}>
+          <div className="flex items-center gap-2 p-2">
+            <Skeleton className="h-4 w-4" />
+            <Skeleton className="h-4 w-24" />
+          </div>
+        </SidebarMenuItem>
+      ))}
+    </SidebarMenu>
+  );
+}
+
+export function SidebarNav({ role }: SidebarNavProps) {
+  return (
+    <Suspense fallback={<SidebarNavMenuSkeleton />}>
+      <NavItems role={role} />
+    </Suspense>
   );
 }

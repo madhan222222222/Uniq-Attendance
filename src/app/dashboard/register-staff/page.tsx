@@ -1,12 +1,13 @@
 
 "use client";
 
+import { Suspense } from "react";
 import { RegisterStaffForm } from "@/components/auth/register-staff-form";
 import { useSearchParams } from "next/navigation";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Loader2 } from "lucide-react";
 
-export default function RegisterStaffPage() {
+function RegisterStaffContent() {
     const searchParams = useSearchParams();
     const role = searchParams.get("role");
 
@@ -22,12 +23,23 @@ export default function RegisterStaffPage() {
         )
     }
 
-
     return (
         <div className="flex flex-col items-center justify-center">
              <div className="w-full max-w-md">
                 <RegisterStaffForm />
             </div>
         </div>
+    );
+}
+
+export default function RegisterStaffPage() {
+    return (
+         <Suspense fallback={
+            <div className="flex justify-center items-center h-40">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+        }>
+            <RegisterStaffContent />
+        </Suspense>
     );
 }
