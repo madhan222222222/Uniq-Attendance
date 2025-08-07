@@ -6,16 +6,17 @@ import admin from 'firebase-admin';
 // This is the secret code required to reset a password.
 const RESET_PASSWORD_CODE = "234567";
 
+// Prepare the service account credentials from environment variables.
+const serviceAccount = {
+    projectId: process.env.FB_PROJECT_ID,
+    privateKey: process.env.FB_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+    clientEmail: process.env.FB_CLIENT_EMAIL,
+};
+
 // Initialize Firebase Admin SDK only if it hasn't been already.
 // This approach ensures it's a singleton and avoids re-initialization errors.
 if (!admin.apps.length) {
-    const serviceAccount = {
-        projectId: process.env.FB_PROJECT_ID,
-        privateKey: process.env.FB_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        clientEmail: process.env.FB_CLIENT_EMAIL,
-    };
-
-    // This check is critical and must run before attempting to initialize.
+    // Check for the existence of credentials before initializing.
     if (serviceAccount.projectId && serviceAccount.privateKey && serviceAccount.clientEmail) {
         try {
             admin.initializeApp({
@@ -24,6 +25,8 @@ if (!admin.apps.length) {
         } catch (error) {
             console.error("Firebase Admin SDK initialization error:", error);
         }
+    } else {
+        console.warn("Firebase Admin credentials are not set. Some features will be disabled.");
     }
 }
 
