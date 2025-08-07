@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -52,6 +53,12 @@ export default function StudentsPage() {
           <CardTitle className="font-headline">Students</CardTitle>
           <CardDescription>Manage student profiles and information.</CardDescription>
         </div>
+        <AddStudentDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} onStudentAdded={handleStudentAdded} batches={batches}>
+          <Button onClick={() => setIsDialogOpen(true)}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Student
+          </Button>
+        </AddStudentDialog>
       </CardHeader>
       <CardContent>
         {isLoading ? (

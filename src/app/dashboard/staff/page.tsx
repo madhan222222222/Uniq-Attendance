@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import type { Staff } from "@/lib/data";
@@ -16,11 +17,15 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Loader2 } from "lucide-react";
 import { AddStaffDialog } from "@/components/staff/add-staff-dialog";
+import { useSearchParams, useRouter } from "next/navigation";
 
-export default function StaffPage() {
+function StaffContent() {
   const [staff, setStaff] = useState<Staff[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const role = searchParams.get("role");
 
   async function fetchStaff() {
     setIsLoading(true);
@@ -38,6 +43,10 @@ export default function StaffPage() {
     fetchStaff();
     setIsDialogOpen(false);
   }
+  
+  const handleRegisterRedirect = () => {
+    router.push(`/dashboard/register-staff?role=admin`);
+  }
 
   return (
     <Card>
@@ -46,6 +55,12 @@ export default function StaffPage() {
           <CardTitle className="font-headline">Staff</CardTitle>
           <CardDescription>Manage staff profiles and permissions.</CardDescription>
         </div>
+         {role === 'admin' && (
+          <Button onClick={handleRegisterRedirect}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Register New Staff
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -79,4 +94,13 @@ export default function StaffPage() {
       </CardContent>
     </Card>
   );
+}
+
+
+export default function StaffPage() {
+  return (
+    <Suspense fallback={<div className="flex h-full w-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary"/></div>}>
+      <StaffContent />
+    </Suspense>
+  )
 }

@@ -115,3 +115,24 @@ export async function addBatch(payload: { name: string; location: string; timing
         return { success: false, message: error.message || "An unknown error occurred." };
     }
 }
+
+export async function addStaff(payload: { name: string; email: string; phone: string; location: string; }) {
+    try {
+        // For staff, we might want to invite them or set a temporary password,
+        // but for now, we'll just add them to the staff collection.
+        // The admin would then need to register them via the "Register New Staff" page
+        // to create their login credentials. This action just adds their profile.
+        const staffDocRef = await addDoc(collection(db, "staff"), {
+            name: payload.name,
+            email: payload.email,
+            phone: payload.phone,
+            location: payload.location,
+            role: 'staff',
+            createdAt: Timestamp.now(),
+        });
+        return { success: true, message: `Staff ${payload.name} added successfully. Register them to create login credentials.` };
+    } catch (error: any) {
+        console.error("Error adding staff: ", error);
+        return { success: false, message: error.message || "An unknown error occurred." };
+    }
+}

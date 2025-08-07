@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
 import type { Batch } from "@/lib/data";
@@ -17,11 +18,14 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { AddBatchDialog } from "@/components/batches/add-batch-dialog";
+import { useSearchParams } from "next/navigation";
 
-export default function BatchesPage() {
+function BatchesContent() {
   const [batches, setBatches] = useState<Batch[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const role = searchParams.get("role");
 
   async function fetchBatches() {
     setIsLoading(true);
@@ -47,6 +51,14 @@ export default function BatchesPage() {
           <CardTitle className="font-headline">Batches</CardTitle>
           <CardDescription>Manage course batches and student assignments.</CardDescription>
         </div>
+         {role === 'admin' && (
+          <AddBatchDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} onBatchAdded={handleBatchAdded}>
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Add New Batch
+            </Button>
+          </AddBatchDialog>
+        )}
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -80,4 +92,13 @@ export default function BatchesPage() {
       </CardContent>
     </Card>
   );
+}
+
+
+export default function BatchesPage() {
+  return (
+    <Suspense fallback={<div className="flex h-full w-full items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary"/></div>}>
+      <BatchesContent />
+    </Suspense>
+  )
 }
