@@ -61,4 +61,6 @@ export async function resetPasswordWithAdminCode(payload: any) {
             return { success: false, message: "No user found with this email address." };
         }
         
-        
+        return { success: false, message: "An unexpected error occurred during password reset." };
+    }
+}
